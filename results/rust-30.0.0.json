@@ -1,0 +1,54 @@
+{
+  "runner": "rust",
+  "sdk": "stellar-xdr",
+  "sdk_version": "30.0.0",
+  "native_function": null,
+  "runtime": "rust (MSRV 1.87)",
+  "results": [
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0001",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "n/a",
+      "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0002",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "n/a",
+      "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0003",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "n/a",
+      "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0004",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "n/a",
+      "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-CONTROL-0001",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "n/a",
+      "detail": ""
+    }
+  ]
+}

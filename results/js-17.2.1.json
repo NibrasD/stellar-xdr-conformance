@@ -1,0 +1,54 @@
+{
+  "runner": "js",
+  "sdk": "@stellar/stellar-sdk",
+  "sdk_version": "17.2.1",
+  "native_function": "scValToNative",
+  "runtime": "node 22.23.4",
+  "results": [
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0001",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "silent-loss",
+      "detail": "scValToNative returned 1 of 2 entries without an error: {\"1\":20}"
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0002",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "silent-loss",
+      "detail": "scValToNative returned 1 of 2 entries without an error: {\"k\":20}"
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0003",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "preserved",
+      "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0004",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "silent-loss",
+      "detail": "scValToNative returned 1 of 2 entries without an error: {\"1\":20}"
+    },
+    {
+      "id": "SCVAL-MAP-CONTROL-0001",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "preserved",
+      "detail": ""
+    }
+  ]
+}

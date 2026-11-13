@@ -1,0 +1,54 @@
+{
+  "native_function": null,
+  "results": [
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0001",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "n/a",
+      "native": "n/a",
+      "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0002",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "n/a",
+      "native": "n/a",
+      "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0003",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "n/a",
+      "native": "n/a",
+      "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0004",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "n/a",
+      "native": "n/a",
+      "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-CONTROL-0001",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "n/a",
+      "native": "n/a",
+      "detail": ""
+    }
+  ],
+  "runner": "go",
+  "runtime": "go1.25.0",
+  "sdk": "github.com/stellar/go-stellar-sdk",
+  "sdk_version": "v0.9.0"
+}

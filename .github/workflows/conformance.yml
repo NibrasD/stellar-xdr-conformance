@@ -1,0 +1,71 @@
+name: conformance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly, so a new upstream release or fix shows up even without a commit here.
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rust toolchain
+        run: rustup toolchain install stable --profile minimal --component rustfmt,clippy
+      - name: cargo fmt
+        run: cargo fmt --all --check
+      - name: cargo clippy
+        run: cargo clippy --all-targets --locked -- -D warnings
+      - name: cargo test
+        run: cargo test --locked
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: runners/go/go.mod
+          cache-dependency-path: runners/go/go.sum
+      - name: gofmt and go vet
+        working-directory: runners/go
+        run: |
+          test -z "$(gofmt -l .)" || { gofmt -l .; exit 1; }
+          go vet ./...
+
+  conformance:
+    name: Corpus and SDK conformance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rust toolchain
+        run: rustup toolchain install stable --profile minimal
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: runners/go/go.mod
+          cache-dependency-path: runners/go/go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.12"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Run pipeline
+        run: ./scripts/run-all.sh
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conformance-report
+          path: |
+            REPORT.md
+            results/

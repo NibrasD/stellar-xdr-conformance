@@ -1,0 +1,21 @@
+{
+  "description": "Native-conversion outcomes that are known and accepted. Any outcome not listed here must be 'preserved', 'rejected' or 'n/a'. A listed outcome that stops occurring also fails CI, so a fix upstream is noticed and this file is updated in the same pull request.",
+  "outcomes": [
+    {
+      "runner": "js",
+      "sdk_version": "17.2.1",
+      "entries": ["SCVAL-MAP-KEYCOLLIDE-0001", "SCVAL-MAP-KEYCOLLIDE-0002", "SCVAL-MAP-KEYCOLLIDE-0004"],
+      "native": "silent-loss",
+      "reason": "Deliberate pre-fix pin. Reproduces js-stellar-sdk#1789; fixed in 17.3.0.",
+      "finding": "findings/FINDING-0001-js-scvaltonative-key-collision.md"
+    },
+    {
+      "runner": "python",
+      "sdk_version": "17.0.1",
+      "entries": ["SCVAL-MAP-KEYCOLLIDE-0002", "SCVAL-MAP-KEYCOLLIDE-0003", "SCVAL-MAP-KEYCOLLIDE-0004"],
+      "native": "silent-loss",
+      "reason": "Sibling of js-stellar-sdk#1789 in the Python SDK, reported upstream as StellarCN/py-stellar-base#1250; fix PR #1252 not merged as of 2026-11-13.",
+      "finding": "findings/FINDING-0002-python-to-native-key-collision.md"
+    }
+  ]
+}

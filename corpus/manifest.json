@@ -1,0 +1,428 @@
+{
+  "$schema": "./schema/manifest.schema.json",
+  "manifest_version": "0.1.0",
+  "generator": {
+    "name": "generator",
+    "stellar_xdr": "30.0.0"
+  },
+  "entries": [
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0001",
+      "title": "ScMap with u32(1) and symbol(\"1\") keys",
+      "description": "Two distinct keys whose native forms print the same in JavaScript. This is the exact reproduction from js-stellar-sdk#1789.",
+      "xdr_type": "ScVal",
+      "file": "entries/SCVAL-MAP-KEYCOLLIDE-0001.xdr",
+      "encoding": "raw",
+      "byte_length": 48,
+      "sha256": "90e0fb9b8958a1596f9efd2b25c51cefc96b3c67fdae20fb8df2bcfe8e9cd19e",
+      "cap": [
+        "CAP-0046-01"
+      ],
+      "protocol_version": {
+        "introduced": 20
+      },
+      "synthetic": true,
+      "source": {
+        "kind": "synthetic",
+        "method": "generator/src/main.rs via ScMap::sorted_from (rs-stellar-xdr 30.0.0)",
+        "network_passphrase": null,
+        "ledger": null,
+        "tx_hash": null
+      },
+      "tags": [
+        "scmap",
+        "native-conversion",
+        "key-collision"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+      ],
+      "expected": {
+        "decoded": {
+          "type": "map",
+          "entries": [
+            {
+              "key": {
+                "type": "u32",
+                "value": "1"
+              },
+              "val": {
+                "type": "u32",
+                "value": "10"
+              }
+            },
+            {
+              "key": {
+                "type": "symbol",
+                "value": "1"
+              },
+              "val": {
+                "type": "u32",
+                "value": "20"
+              }
+            }
+          ]
+        },
+        "xdr_json": {
+          "map": [
+            {
+              "key": {
+                "u32": 1
+              },
+              "val": {
+                "u32": 10
+              }
+            },
+            {
+              "key": {
+                "symbol": "1"
+              },
+              "val": {
+                "u32": 20
+              }
+            }
+          ]
+        },
+        "base64": "AAAAEQAAAAEAAAACAAAAAwAAAAEAAAADAAAACgAAAA8AAAABMQAAAAAAAAMAAAAU"
+      },
+      "native_conversion": {
+        "rule": "preserve-or-reject",
+        "distinct_keys": 2
+      }
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0002",
+      "title": "ScMap with string(\"k\") and symbol(\"k\") keys",
+      "description": "SCString and SCSymbol with the same text. Most languages map both to their native string type.",
+      "xdr_type": "ScVal",
+      "file": "entries/SCVAL-MAP-KEYCOLLIDE-0002.xdr",
+      "encoding": "raw",
+      "byte_length": 52,
+      "sha256": "763d99e1f848768f41a718f931618649c1c2975fa708d1f75223a9bcbc3e918f",
+      "cap": [
+        "CAP-0046-01"
+      ],
+      "protocol_version": {
+        "introduced": 20
+      },
+      "synthetic": true,
+      "source": {
+        "kind": "synthetic",
+        "method": "generator/src/main.rs via ScMap::sorted_from (rs-stellar-xdr 30.0.0)",
+        "network_passphrase": null,
+        "ledger": null,
+        "tx_hash": null
+      },
+      "tags": [
+        "scmap",
+        "native-conversion",
+        "key-collision"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+      ],
+      "expected": {
+        "decoded": {
+          "type": "map",
+          "entries": [
+            {
+              "key": {
+                "type": "string",
+                "value": "k"
+              },
+              "val": {
+                "type": "u32",
+                "value": "10"
+              }
+            },
+            {
+              "key": {
+                "type": "symbol",
+                "value": "k"
+              },
+              "val": {
+                "type": "u32",
+                "value": "20"
+              }
+            }
+          ]
+        },
+        "xdr_json": {
+          "map": [
+            {
+              "key": {
+                "string": "k"
+              },
+              "val": {
+                "u32": 10
+              }
+            },
+            {
+              "key": {
+                "symbol": "k"
+              },
+              "val": {
+                "u32": 20
+              }
+            }
+          ]
+        },
+        "base64": "AAAAEQAAAAEAAAACAAAADgAAAAFrAAAAAAAAAwAAAAoAAAAPAAAAAWsAAAAAAAADAAAAFA=="
+      },
+      "native_conversion": {
+        "rule": "preserve-or-reject",
+        "distinct_keys": 2
+      }
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0003",
+      "title": "ScMap with bool(true) and u32(1) keys",
+      "description": "Collides in languages where true equals 1 as a map key (Python). Does not collide in JavaScript, where the keys become \"true\" and \"1\".",
+      "xdr_type": "ScVal",
+      "file": "entries/SCVAL-MAP-KEYCOLLIDE-0003.xdr",
+      "encoding": "raw",
+      "byte_length": 44,
+      "sha256": "d9687fd082a937388d77e67d39c2cbd63502b08f20db6a41430bfc4b5981f103",
+      "cap": [
+        "CAP-0046-01"
+      ],
+      "protocol_version": {
+        "introduced": 20
+      },
+      "synthetic": true,
+      "source": {
+        "kind": "synthetic",
+        "method": "generator/src/main.rs via ScMap::sorted_from (rs-stellar-xdr 30.0.0)",
+        "network_passphrase": null,
+        "ledger": null,
+        "tx_hash": null
+      },
+      "tags": [
+        "scmap",
+        "native-conversion",
+        "key-collision"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+      ],
+      "expected": {
+        "decoded": {
+          "type": "map",
+          "entries": [
+            {
+              "key": {
+                "type": "bool",
+                "value": "true"
+              },
+              "val": {
+                "type": "u32",
+                "value": "10"
+              }
+            },
+            {
+              "key": {
+                "type": "u32",
+                "value": "1"
+              },
+              "val": {
+                "type": "u32",
+                "value": "20"
+              }
+            }
+          ]
+        },
+        "xdr_json": {
+          "map": [
+            {
+              "key": {
+                "bool": true
+              },
+              "val": {
+                "u32": 10
+              }
+            },
+            {
+              "key": {
+                "u32": 1
+              },
+              "val": {
+                "u32": 20
+              }
+            }
+          ]
+        },
+        "base64": "AAAAEQAAAAEAAAACAAAAAAAAAAEAAAADAAAACgAAAAMAAAABAAAAAwAAABQ="
+      },
+      "native_conversion": {
+        "rule": "preserve-or-reject",
+        "distinct_keys": 2
+      }
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0004",
+      "title": "ScMap with u32(1) and i64(1) keys",
+      "description": "Integer keys of different widths and signedness with the same numeric value.",
+      "xdr_type": "ScVal",
+      "file": "entries/SCVAL-MAP-KEYCOLLIDE-0004.xdr",
+      "encoding": "raw",
+      "byte_length": 48,
+      "sha256": "104efa80c4e43b7661b920ce12c45c4ba11f5d733de424cff55740ce2ce9bbe3",
+      "cap": [
+        "CAP-0046-01"
+      ],
+      "protocol_version": {
+        "introduced": 20
+      },
+      "synthetic": true,
+      "source": {
+        "kind": "synthetic",
+        "method": "generator/src/main.rs via ScMap::sorted_from (rs-stellar-xdr 30.0.0)",
+        "network_passphrase": null,
+        "ledger": null,
+        "tx_hash": null
+      },
+      "tags": [
+        "scmap",
+        "native-conversion",
+        "key-collision"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+      ],
+      "expected": {
+        "decoded": {
+          "type": "map",
+          "entries": [
+            {
+              "key": {
+                "type": "u32",
+                "value": "1"
+              },
+              "val": {
+                "type": "u32",
+                "value": "10"
+              }
+            },
+            {
+              "key": {
+                "type": "i64",
+                "value": "1"
+              },
+              "val": {
+                "type": "u32",
+                "value": "20"
+              }
+            }
+          ]
+        },
+        "xdr_json": {
+          "map": [
+            {
+              "key": {
+                "u32": 1
+              },
+              "val": {
+                "u32": 10
+              }
+            },
+            {
+              "key": {
+                "i64": "1"
+              },
+              "val": {
+                "u32": 20
+              }
+            }
+          ]
+        },
+        "base64": "AAAAEQAAAAEAAAACAAAAAwAAAAEAAAADAAAACgAAAAYAAAAAAAAAAQAAAAMAAAAU"
+      },
+      "native_conversion": {
+        "rule": "preserve-or-reject",
+        "distinct_keys": 2
+      }
+    },
+    {
+      "id": "SCVAL-MAP-CONTROL-0001",
+      "title": "ScMap with two distinct symbol keys (control)",
+      "description": "No collision in any language. Every SDK must preserve both entries; a failure here points at the runner, not the SDK.",
+      "xdr_type": "ScVal",
+      "file": "entries/SCVAL-MAP-CONTROL-0001.xdr",
+      "encoding": "raw",
+      "byte_length": 52,
+      "sha256": "6719f974d35ca31098c62506bc1452b701a8278987ba741d7b0b053cb1d4c3aa",
+      "cap": [
+        "CAP-0046-01"
+      ],
+      "protocol_version": {
+        "introduced": 20
+      },
+      "synthetic": true,
+      "source": {
+        "kind": "synthetic",
+        "method": "generator/src/main.rs via ScMap::sorted_from (rs-stellar-xdr 30.0.0)",
+        "network_passphrase": null,
+        "ledger": null,
+        "tx_hash": null
+      },
+      "tags": [
+        "scmap",
+        "native-conversion",
+        "control"
+      ],
+      "related_issues": [],
+      "expected": {
+        "decoded": {
+          "type": "map",
+          "entries": [
+            {
+              "key": {
+                "type": "symbol",
+                "value": "a"
+              },
+              "val": {
+                "type": "u32",
+                "value": "1"
+              }
+            },
+            {
+              "key": {
+                "type": "symbol",
+                "value": "b"
+              },
+              "val": {
+                "type": "u32",
+                "value": "2"
+              }
+            }
+          ]
+        },
+        "xdr_json": {
+          "map": [
+            {
+              "key": {
+                "symbol": "a"
+              },
+              "val": {
+                "u32": 1
+              }
+            },
+            {
+              "key": {
+                "symbol": "b"
+              },
+              "val": {
+                "u32": 2
+              }
+            }
+          ]
+        },
+        "base64": "AAAAEQAAAAEAAAACAAAADwAAAAFhAAAAAAAAAwAAAAEAAAAPAAAAAWIAAAAAAAADAAAAAg=="
+      },
+      "native_conversion": {
+        "rule": "preserve-or-reject",
+        "distinct_keys": 2
+      }
+    }
+  ]
+}

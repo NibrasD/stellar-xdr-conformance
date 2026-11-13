@@ -1,0 +1,374 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/NibrasD/stellar-xdr-conformance/corpus/schema/manifest.schema.json",
+  "title": "Stellar XDR conformance corpus manifest",
+  "description": "Describes every corpus entry: where its bytes live, which CAP and protocol introduced the shape, where the bytes came from, and the decoded values every SDK must agree on.",
+  "type": "object",
+  "required": [
+    "manifest_version",
+    "generator",
+    "entries"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "manifest_version": {
+      "description": "Semantic version of this manifest format.",
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "generator": {
+      "type": "object",
+      "required": [
+        "name",
+        "stellar_xdr"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "stellar_xdr": {
+          "description": "Exact rs-stellar-xdr version that produced the entries.",
+          "type": "string"
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "xdr_type",
+        "file",
+        "encoding",
+        "byte_length",
+        "sha256",
+        "cap",
+        "protocol_version",
+        "synthetic",
+        "source",
+        "expected"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Stable identifier: <XDR TYPE>-<FAMILY>-<SHAPE>-<NNNN>. Never reused.",
+          "type": "string",
+          "pattern": "^[A-Z0-9]+(-[A-Z0-9]+)*-\\d{4}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "xdr_type": {
+          "description": "Top-level XDR type of the file, as named in stellar-xdr (for example ScVal, TransactionEnvelope, LedgerCloseMeta).",
+          "type": "string"
+        },
+        "file": {
+          "description": "Path relative to corpus/.",
+          "type": "string",
+          "pattern": "^entries/[A-Za-z0-9._-]+\\.xdr$"
+        },
+        "encoding": {
+          "description": "raw: the file holds the XDR bytes themselves.",
+          "enum": [
+            "raw"
+          ]
+        },
+        "byte_length": {
+          "type": "integer",
+          "minimum": 4
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "cap": {
+          "description": "CAPs that introduced or changed this shape.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^CAP-\\d{4}(-\\d{2})?$"
+          }
+        },
+        "protocol_version": {
+          "type": "object",
+          "required": [
+            "introduced"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "introduced": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "changed": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "synthetic": {
+          "description": "true when the bytes were built rather than captured from network history or emitted by a local stellar-core.",
+          "type": "boolean"
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "related_issues": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "expected": {
+          "type": "object",
+          "required": [
+            "decoded",
+            "base64"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "decoded": {
+              "$ref": "#/$defs/typedValue"
+            },
+            "xdr_json": {
+              "description": "The entry as rs-stellar-xdr serializes it to JSON (xdr-json)."
+            },
+            "base64": {
+              "type": "string",
+              "contentEncoding": "base64"
+            }
+          }
+        },
+        "native_conversion": {
+          "description": "What an SDK's conversion to native language values must do.",
+          "type": "object",
+          "required": [
+            "rule",
+            "distinct_keys"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "rule": {
+              "description": "preserve-or-reject: the native result keeps every entry, or the SDK raises an error. Returning fewer entries without an error is a defect.",
+              "enum": [
+                "preserve-or-reject"
+              ]
+            },
+            "distinct_keys": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "synthetic": {
+                "const": false
+              }
+            },
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "testnet",
+                      "mainnet",
+                      "local-core"
+                    ]
+                  },
+                  "network_passphrase": {
+                    "type": "string"
+                  },
+                  "ledger": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "network_passphrase",
+                  "ledger"
+                ],
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "synthetic": {
+                "const": true
+              }
+            },
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": {
+                  "kind": {
+                    "const": "synthetic"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        }
+      ]
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "kind",
+        "method"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "synthetic",
+            "testnet",
+            "mainnet",
+            "local-core"
+          ]
+        },
+        "method": {
+          "description": "How the bytes were produced or captured, precisely enough to repeat.",
+          "type": "string"
+        },
+        "network_passphrase": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ledger": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "tx_hash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "typedValue": {
+      "description": "Language-neutral decoded value: XDR type name plus the value as a string, or a list of typed entries for a map.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "bool",
+            "u32",
+            "i32",
+            "u64",
+            "i64",
+            "symbol",
+            "string",
+            "map"
+          ]
+        },
+        "value": {
+          "type": "string"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "key",
+              "val"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "key": {
+                "$ref": "#/$defs/typedValue"
+              },
+              "val": {
+                "$ref": "#/$defs/typedValue"
+              }
+            }
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "map"
+          }
+        },
+        "type": "object"
+      },
+      "then": {
+        "type": "object",
+        "required": [
+          "entries"
+        ],
+        "properties": {
+          "entries": {
+            "type": "array"
+          },
+          "value": false
+        }
+      },
+      "else": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "entries": false
+        }
+      }
+    }
+  }
+}

@@ -49,6 +49,42 @@
       "xdr_json": "pass",
       "native": "preserved",
       "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0101",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "silent-loss",
+      "detail": "scValToNative returned 1 of 2 entries without an error: {\"1\":20}"
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0102",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "silent-loss",
+      "detail": "scValToNative returned 1 of 2 entries without an error: {\"k\":20}"
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0103",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "preserved",
+      "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0104",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "silent-loss",
+      "detail": "scValToNative returned 1 of 2 entries without an error: {\"1\":20}"
     }
   ]
 }

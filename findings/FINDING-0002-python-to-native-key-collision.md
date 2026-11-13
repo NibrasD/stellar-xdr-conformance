@@ -8,7 +8,7 @@
 | Affected | 17.0.1 (latest release at the time of writing) |
 | Severity | Medium: silent data loss, and in one case a value attached to the wrong key |
 | CAP | CAP-0046-01 (`SCMap`, protocol 20) |
-| Corpus entries | `SCVAL-MAP-KEYCOLLIDE-0002`, `-0003`, `-0004` |
+| Corpus entries | `SCVAL-MAP-KEYCOLLIDE-0002`, `-0003`, `-0004`, and their testnet-captured twins `-0102`, `-0103`, `-0104` |
 | Status | Independently confirmed at runtime by this harness; reported upstream by others first |
 
 This is the Python sibling of

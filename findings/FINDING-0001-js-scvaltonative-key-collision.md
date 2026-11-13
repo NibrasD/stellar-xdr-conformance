@@ -8,7 +8,7 @@
 | First fixed | 17.3.0 (confirmed by reading the published package source) |
 | Severity | Medium: silent data loss in decoded contract values, events and invocation trees |
 | CAP | CAP-0046-01 (`SCMap`, protocol 20) |
-| Corpus entries | `SCVAL-MAP-KEYCOLLIDE-0001`, `-0002`, `-0004` |
+| Corpus entries | `SCVAL-MAP-KEYCOLLIDE-0001`, `-0002`, `-0004`, and their testnet-captured twins `-0101`, `-0102`, `-0104` |
 | Status | Reproduced on the pre-fix pin and verified fixed on 17.4.0 |
 
 ## What happens

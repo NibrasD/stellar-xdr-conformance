@@ -423,6 +423,382 @@
         "rule": "preserve-or-reject",
         "distinct_keys": 2
       }
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0101",
+      "title": "ScMap with u32(1) and symbol(\"1\") keys, captured on testnet",
+      "description": "Return value of a real testnet transaction, extracted from the LedgerCloseMeta stellar-core produced for ledger 5712618. Same shape as SCVAL-MAP-KEYCOLLIDE-0001.",
+      "xdr_type": "ScVal",
+      "file": "entries/SCVAL-MAP-KEYCOLLIDE-0101.xdr",
+      "encoding": "raw",
+      "byte_length": 48,
+      "sha256": "90e0fb9b8958a1596f9efd2b25c51cefc96b3c67fdae20fb8df2bcfe8e9cd19e",
+      "cap": [
+        "CAP-0046-01"
+      ],
+      "protocol_version": {
+        "introduced": 20,
+        "observed": 30
+      },
+      "synthetic": false,
+      "source": {
+        "kind": "testnet",
+        "method": "TransactionMeta.soroban_meta.return_value of tx_hash, extracted from the LedgerCloseMeta returned by RPC getLedgers (capture/capture.mjs, then generator/src/main.rs extract_return_value)",
+        "network_passphrase": "Test SDF Network ; September 2015",
+        "ledger": 5712618,
+        "ledger_hash": "81c9c05a1dd99215ea45ddcfc72c6a49a3a98fc2272121fb3d037ad5f2438956",
+        "tx_hash": "a7de477c3e5a3627a625c6badc7d6772477040fe21d4c03e0550c3b611dca0fc",
+        "contract_id": "CDFWEMZUAL2WCGQQ7AJQLB7OYYK2HCYLZUHMALAEU6NGOVGRBDKQMRJZ",
+        "ledger_close_meta": {
+          "file": "captured/testnet/ledger-5712618.lcm.xdr",
+          "byte_length": 131904,
+          "sha256": "d11156494a60da2fb33c97b1a34b767040da3f6d8b3d38ba403c0d718f575f9f"
+        }
+      },
+      "tags": [
+        "scmap",
+        "native-conversion",
+        "key-collision",
+        "captured"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+      ],
+      "expected": {
+        "decoded": {
+          "type": "map",
+          "entries": [
+            {
+              "key": {
+                "type": "u32",
+                "value": "1"
+              },
+              "val": {
+                "type": "u32",
+                "value": "10"
+              }
+            },
+            {
+              "key": {
+                "type": "symbol",
+                "value": "1"
+              },
+              "val": {
+                "type": "u32",
+                "value": "20"
+              }
+            }
+          ]
+        },
+        "xdr_json": {
+          "map": [
+            {
+              "key": {
+                "u32": 1
+              },
+              "val": {
+                "u32": 10
+              }
+            },
+            {
+              "key": {
+                "symbol": "1"
+              },
+              "val": {
+                "u32": 20
+              }
+            }
+          ]
+        },
+        "base64": "AAAAEQAAAAEAAAACAAAAAwAAAAEAAAADAAAACgAAAA8AAAABMQAAAAAAAAMAAAAU"
+      },
+      "same_bytes_as": "SCVAL-MAP-KEYCOLLIDE-0001",
+      "native_conversion": {
+        "rule": "preserve-or-reject",
+        "distinct_keys": 2
+      }
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0102",
+      "title": "ScMap with string(\"k\") and symbol(\"k\") keys, captured on testnet",
+      "description": "Return value of a real testnet transaction, extracted from the LedgerCloseMeta stellar-core produced for ledger 5712619. Same shape as SCVAL-MAP-KEYCOLLIDE-0002.",
+      "xdr_type": "ScVal",
+      "file": "entries/SCVAL-MAP-KEYCOLLIDE-0102.xdr",
+      "encoding": "raw",
+      "byte_length": 52,
+      "sha256": "763d99e1f848768f41a718f931618649c1c2975fa708d1f75223a9bcbc3e918f",
+      "cap": [
+        "CAP-0046-01"
+      ],
+      "protocol_version": {
+        "introduced": 20,
+        "observed": 30
+      },
+      "synthetic": false,
+      "source": {
+        "kind": "testnet",
+        "method": "TransactionMeta.soroban_meta.return_value of tx_hash, extracted from the LedgerCloseMeta returned by RPC getLedgers (capture/capture.mjs, then generator/src/main.rs extract_return_value)",
+        "network_passphrase": "Test SDF Network ; September 2015",
+        "ledger": 5712619,
+        "ledger_hash": "7c1587edb99a582b6a0dfeb9e4e8488c099e1da2cd52a45df35b9c95ae83ae26",
+        "tx_hash": "c5ba4fd78edd43cf0e4fc279fa344807c38c6ed69671ea833a4f23bca0ae04b5",
+        "contract_id": "CDFWEMZUAL2WCGQQ7AJQLB7OYYK2HCYLZUHMALAEU6NGOVGRBDKQMRJZ",
+        "ledger_close_meta": {
+          "file": "captured/testnet/ledger-5712619.lcm.xdr",
+          "byte_length": 103440,
+          "sha256": "59bef662f51bc73f9dcfcc3dd5500a7647e2304d347f11c43f87e54e69e3f960"
+        }
+      },
+      "tags": [
+        "scmap",
+        "native-conversion",
+        "key-collision",
+        "captured"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+      ],
+      "expected": {
+        "decoded": {
+          "type": "map",
+          "entries": [
+            {
+              "key": {
+                "type": "string",
+                "value": "k"
+              },
+              "val": {
+                "type": "u32",
+                "value": "10"
+              }
+            },
+            {
+              "key": {
+                "type": "symbol",
+                "value": "k"
+              },
+              "val": {
+                "type": "u32",
+                "value": "20"
+              }
+            }
+          ]
+        },
+        "xdr_json": {
+          "map": [
+            {
+              "key": {
+                "string": "k"
+              },
+              "val": {
+                "u32": 10
+              }
+            },
+            {
+              "key": {
+                "symbol": "k"
+              },
+              "val": {
+                "u32": 20
+              }
+            }
+          ]
+        },
+        "base64": "AAAAEQAAAAEAAAACAAAADgAAAAFrAAAAAAAAAwAAAAoAAAAPAAAAAWsAAAAAAAADAAAAFA=="
+      },
+      "same_bytes_as": "SCVAL-MAP-KEYCOLLIDE-0002",
+      "native_conversion": {
+        "rule": "preserve-or-reject",
+        "distinct_keys": 2
+      }
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0103",
+      "title": "ScMap with bool(true) and u32(1) keys, captured on testnet",
+      "description": "Return value of a real testnet transaction, extracted from the LedgerCloseMeta stellar-core produced for ledger 5712620. Same shape as SCVAL-MAP-KEYCOLLIDE-0003.",
+      "xdr_type": "ScVal",
+      "file": "entries/SCVAL-MAP-KEYCOLLIDE-0103.xdr",
+      "encoding": "raw",
+      "byte_length": 44,
+      "sha256": "d9687fd082a937388d77e67d39c2cbd63502b08f20db6a41430bfc4b5981f103",
+      "cap": [
+        "CAP-0046-01"
+      ],
+      "protocol_version": {
+        "introduced": 20,
+        "observed": 30
+      },
+      "synthetic": false,
+      "source": {
+        "kind": "testnet",
+        "method": "TransactionMeta.soroban_meta.return_value of tx_hash, extracted from the LedgerCloseMeta returned by RPC getLedgers (capture/capture.mjs, then generator/src/main.rs extract_return_value)",
+        "network_passphrase": "Test SDF Network ; September 2015",
+        "ledger": 5712620,
+        "ledger_hash": "477150a525f4267570c06e76d25b11e0059142b51f3b84a34dfa480d0739e89a",
+        "tx_hash": "7909b7c8a886e04698757ab72b36aee908d741750c31351273c1f632f7bec1f3",
+        "contract_id": "CDFWEMZUAL2WCGQQ7AJQLB7OYYK2HCYLZUHMALAEU6NGOVGRBDKQMRJZ",
+        "ledger_close_meta": {
+          "file": "captured/testnet/ledger-5712620.lcm.xdr",
+          "byte_length": 416476,
+          "sha256": "67c637c4dd5f5d44bb9a0f91b8b02a0f3a9d77e952aabe5c1095d8758e347c2d"
+        }
+      },
+      "tags": [
+        "scmap",
+        "native-conversion",
+        "key-collision",
+        "captured"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+      ],
+      "expected": {
+        "decoded": {
+          "type": "map",
+          "entries": [
+            {
+              "key": {
+                "type": "bool",
+                "value": "true"
+              },
+              "val": {
+                "type": "u32",
+                "value": "10"
+              }
+            },
+            {
+              "key": {
+                "type": "u32",
+                "value": "1"
+              },
+              "val": {
+                "type": "u32",
+                "value": "20"
+              }
+            }
+          ]
+        },
+        "xdr_json": {
+          "map": [
+            {
+              "key": {
+                "bool": true
+              },
+              "val": {
+                "u32": 10
+              }
+            },
+            {
+              "key": {
+                "u32": 1
+              },
+              "val": {
+                "u32": 20
+              }
+            }
+          ]
+        },
+        "base64": "AAAAEQAAAAEAAAACAAAAAAAAAAEAAAADAAAACgAAAAMAAAABAAAAAwAAABQ="
+      },
+      "same_bytes_as": "SCVAL-MAP-KEYCOLLIDE-0003",
+      "native_conversion": {
+        "rule": "preserve-or-reject",
+        "distinct_keys": 2
+      }
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0104",
+      "title": "ScMap with u32(1) and i64(1) keys, captured on testnet",
+      "description": "Return value of a real testnet transaction, extracted from the LedgerCloseMeta stellar-core produced for ledger 5712621. Same shape as SCVAL-MAP-KEYCOLLIDE-0004.",
+      "xdr_type": "ScVal",
+      "file": "entries/SCVAL-MAP-KEYCOLLIDE-0104.xdr",
+      "encoding": "raw",
+      "byte_length": 48,
+      "sha256": "104efa80c4e43b7661b920ce12c45c4ba11f5d733de424cff55740ce2ce9bbe3",
+      "cap": [
+        "CAP-0046-01"
+      ],
+      "protocol_version": {
+        "introduced": 20,
+        "observed": 30
+      },
+      "synthetic": false,
+      "source": {
+        "kind": "testnet",
+        "method": "TransactionMeta.soroban_meta.return_value of tx_hash, extracted from the LedgerCloseMeta returned by RPC getLedgers (capture/capture.mjs, then generator/src/main.rs extract_return_value)",
+        "network_passphrase": "Test SDF Network ; September 2015",
+        "ledger": 5712621,
+        "ledger_hash": "9ee2b5a8c290c819f28be9e660cc7213183148584a471349e3d3a9b6d1a40526",
+        "tx_hash": "418be97d51f048ffd4bb535cca1b417dd10bab6259e2e67409ec7f0152416cfc",
+        "contract_id": "CDFWEMZUAL2WCGQQ7AJQLB7OYYK2HCYLZUHMALAEU6NGOVGRBDKQMRJZ",
+        "ledger_close_meta": {
+          "file": "captured/testnet/ledger-5712621.lcm.xdr",
+          "byte_length": 99932,
+          "sha256": "1d293b104bf5d33b7bc390a0e3ab989fdc7dfd31b0e6b1a7ce798789fb080299"
+        }
+      },
+      "tags": [
+        "scmap",
+        "native-conversion",
+        "key-collision",
+        "captured"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+      ],
+      "expected": {
+        "decoded": {
+          "type": "map",
+          "entries": [
+            {
+              "key": {
+                "type": "u32",
+                "value": "1"
+              },
+              "val": {
+                "type": "u32",
+                "value": "10"
+              }
+            },
+            {
+              "key": {
+                "type": "i64",
+                "value": "1"
+              },
+              "val": {
+                "type": "u32",
+                "value": "20"
+              }
+            }
+          ]
+        },
+        "xdr_json": {
+          "map": [
+            {
+              "key": {
+                "u32": 1
+              },
+              "val": {
+                "u32": 10
+              }
+            },
+            {
+              "key": {
+                "i64": "1"
+              },
+              "val": {
+                "u32": 20
+              }
+            }
+          ]
+        },
+        "base64": "AAAAEQAAAAEAAAACAAAAAwAAAAEAAAADAAAACgAAAAYAAAAAAAAAAQAAAAMAAAAU"
+      },
+      "same_bytes_as": "SCVAL-MAP-KEYCOLLIDE-0004",
+      "native_conversion": {
+        "rule": "preserve-or-reject",
+        "distinct_keys": 2
+      }
     }
   ]
 }

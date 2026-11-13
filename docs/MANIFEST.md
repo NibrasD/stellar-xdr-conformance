@@ -20,8 +20,12 @@ pipeline or SDK can read it without depending on code in this repository.
 | `cap` | CAPs that introduced or changed the shape, such as `CAP-0046-01`. |
 | `protocol_version.introduced` | First protocol version in which the shape can occur on the network. |
 | `synthetic` | `true` when the bytes were built rather than captured from network history or emitted by a local stellar-core. |
-| `source.kind` | `synthetic`, `testnet`, `mainnet` or `local-core`. A non-synthetic entry must also give `network_passphrase` and `ledger`. |
+| `source.kind` | `synthetic`, `testnet`, `mainnet` or `local-core`. A non-synthetic entry must also give `network_passphrase`, `ledger`, `ledger_hash`, `tx_hash` and `ledger_close_meta`. |
 | `source.method` | How the bytes were produced or captured, precise enough to repeat. |
+| `source.ledger_close_meta` | Captured entries: the saved raw `LedgerCloseMeta` (path under `corpus/`, length, SHA-256) the entry was extracted from. |
+| `source.contract_id` | Captured contract outputs: the contract that produced the value. |
+| `protocol_version.observed` | Captured entries: protocol version of the ledger they came from. |
+| `same_bytes_as` | Captured entries: the synthetic entry whose bytes are identical, if any. |
 | `related_issues` | Upstream issues the entry reproduces or guards against. |
 | `expected.decoded` | The decoded value in a language-neutral typed form (see below). Every runner compares its decode against this. |
 | `expected.xdr_json` | The value as rs-stellar-xdr serializes it to JSON. Runners compare against it where their SDK exposes xdr-json. |
@@ -61,9 +65,20 @@ error is a defect.
 
 ## Synthetic and captured entries
 
-The entries in this first release are synthetic: built with
-`ScMap::sorted_from`, which sorts keys and rejects duplicates the same way
-the Soroban host does, so every map is one the network would accept. The
-manifest marks them `synthetic: true`. Entries captured from testnet,
-mainnet or a local stellar-core will carry the network passphrase, ledger
-sequence and transaction hash, so anyone can fetch the same bytes again.
+Synthetic entries are built with `ScMap::sorted_from`, which sorts keys and
+rejects duplicates the same way the Soroban host does. The manifest marks
+them `synthetic: true`.
+
+Captured entries come from real ledgers. `capture/capture.mjs` runs once,
+by hand, against the network and saves each raw `LedgerCloseMeta` under
+`corpus/captured/` with its ledger sequence, ledger hash and transaction
+hash in `corpus/captured/captures.json`. The generator then extracts the
+entry from the saved meta offline, after checking the ledger sequence,
+the ledger hash and that the transaction succeeded, so CI never touches the
+network. When a captured entry is byte-identical to a synthetic one, the
+manifest records it in `same_bytes_as`: evidence that the synthetic entry is
+something core really emits.
+
+To add a captured entry, extend `capture/capture.mjs` (or add a capture for
+an existing transaction), run it once, then run `cargo run -p generator`
+and commit the saved meta, `captures.json`, the entry and the manifest.

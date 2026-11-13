@@ -49,6 +49,42 @@
       "xdr_json": "pass",
       "native": "preserved",
       "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0101",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "rejected",
+      "detail": "scValToNative threw TypeError: scvMap has more than one key that converts to \"1\"; read the raw map entries instead"
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0102",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "rejected",
+      "detail": "scValToNative threw TypeError: scvMap has more than one key that converts to \"k\"; read the raw map entries instead"
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0103",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "preserved",
+      "detail": ""
+    },
+    {
+      "id": "SCVAL-MAP-KEYCOLLIDE-0104",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "rejected",
+      "detail": "scValToNative threw TypeError: scvMap has more than one key that converts to \"1\"; read the raw map entries instead"
     }
   ]
 }

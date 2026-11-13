@@ -32,10 +32,13 @@ divergence is in conversion to native language values:
   [js-stellar-sdk#1789](https://github.com/stellar/js-stellar-sdk/issues/1789).
   17.3.0 and later raise an error instead.
   See [FINDING-0001](findings/FINDING-0001-js-scvaltonative-key-collision.md).
-- **Python 17.0.1** has the same defect, plus a case JavaScript does not have:
-  `bool(true)` and `u32(1)` collide because `True == 1` in Python, and the
-  surviving key carries the other key's value. Already reported upstream as
-  [py-stellar-base#1250](https://github.com/StellarCN/py-stellar-base/issues/1250).
+- **Python 17.0.1** has the same defect. It was already reported upstream as
+  [py-stellar-base#1250](https://github.com/StellarCN/py-stellar-base/issues/1250),
+  which lists all three cases, including `bool(true)` and `u32(1)`
+  (`True == 1` in Python). The harness confirmed them independently and
+  automatically, by running the same bytes it uses for JavaScript. The
+  `bool`/`u32` case also shows why each SDK needs the whole corpus: it does
+  not collide in JavaScript.
   See [FINDING-0002](findings/FINDING-0002-python-to-native-key-collision.md).
 
 ## How it works

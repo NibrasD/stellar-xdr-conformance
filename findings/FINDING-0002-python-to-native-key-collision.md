@@ -54,6 +54,8 @@ Observed on 17.0.1:
   dict keeps the first key it saw but the last value. The result `{True: 20}`
   pairs the `bool` key with the value that belonged to the `u32` key, so the
   data is not only incomplete but wrong. JavaScript does not have this case.
+  The upstream report already lists it; the harness reproduced it
+  independently.
 - The upstream issue also names `from_map` and `from_struct`. This harness
   tests only `to_native` so far.
 - This harness has not checked whether PR #1252 covers the `bool`/`int` case.

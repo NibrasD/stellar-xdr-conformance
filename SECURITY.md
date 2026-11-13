@@ -27,4 +27,9 @@ versions and the severity.
 The generator, runners and report run offline against files in this
 repository. They need no network access after dependencies are installed,
 and no keys or funds. The CI workflow has read-only repository permissions.
-Every SDK under test is pinned to an exact version (package-lock.json, go.sum, Cargo.lock, requirements.txt).
+Dependencies are pinned with integrity checks: `package-lock.json` (npm
+integrity hashes), `go.sum`, `Cargo.lock`, and a fully resolved Python
+lockfile (`runners/python/requirements.txt`, every transitive package with
+its SHA-256, installed with `pip --require-hashes`). The Rust toolchain is
+pinned in `rust-toolchain.toml`. GitHub Actions are pinned to full commit
+SHAs, and checkout does not persist credentials.

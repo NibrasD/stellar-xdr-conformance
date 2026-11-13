@@ -29,7 +29,7 @@ echo "== runner: python"
 (
   cd runners/python
   [ -d .venv ] || python3 -m venv .venv
-  .venv/bin/pip install --quiet --disable-pip-version-check -r requirements.txt
+  .venv/bin/pip install --quiet --disable-pip-version-check --require-hashes -r requirements.txt
   .venv/bin/python run.py
 )
 

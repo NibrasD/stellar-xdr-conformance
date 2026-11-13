@@ -124,6 +124,11 @@
                 "type": "integer",
                 "minimum": 1
               }
+            },
+            "observed": {
+              "description": "Protocol version of the ledger the entry was captured from.",
+              "type": "integer",
+              "minimum": 1
             }
           }
         },
@@ -187,6 +192,10 @@
               "minimum": 0
             }
           }
+        },
+        "same_bytes_as": {
+          "description": "ID of a synthetic entry whose bytes are identical to this captured one: evidence that the synthetic entry is something core really emits.",
+          "type": "string"
         }
       },
       "allOf": [
@@ -216,11 +225,23 @@
                   "ledger": {
                     "type": "integer",
                     "minimum": 1
+                  },
+                  "ledger_hash": {
+                    "type": "string"
+                  },
+                  "tx_hash": {
+                    "type": "string"
+                  },
+                  "ledger_close_meta": {
+                    "type": "object"
                   }
                 },
                 "required": [
                   "network_passphrase",
-                  "ledger"
+                  "ledger",
+                  "ledger_hash",
+                  "tx_hash",
+                  "ledger_close_meta"
                 ],
                 "type": "object"
               }
@@ -292,6 +313,43 @@
             "null"
           ],
           "pattern": "^[0-9a-f]{64}$"
+        },
+        "ledger_hash": {
+          "description": "Hash of the ledger, as recorded in its LedgerHeaderHistoryEntry.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contract_id": {
+          "description": "Contract that produced the value, for captured contract outputs.",
+          "type": "string",
+          "pattern": "^C[A-Z2-7]{55}$"
+        },
+        "ledger_close_meta": {
+          "description": "The raw LedgerCloseMeta the entry was extracted from, saved at capture time so extraction can be repeated offline.",
+          "type": "object",
+          "required": [
+            "file",
+            "byte_length",
+            "sha256"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "type": "string",
+              "pattern": "^captured/[A-Za-z0-9._/-]+\\.xdr$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 4
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
         }
       }
     },

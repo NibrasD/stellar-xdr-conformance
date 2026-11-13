@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["generator", "runners/rust"]
+exclude = ["capture/contract"]
 
 [workspace.package]
 edition = "2021"

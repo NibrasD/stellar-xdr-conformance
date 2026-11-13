@@ -16,7 +16,10 @@ use std::{
 
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
-use stellar_xdr::{Limits, ReadXdr, ScMap, ScMapEntry, ScString, ScSymbol, ScVal, WriteXdr};
+use stellar_xdr::{
+    LedgerCloseMeta, Limits, ReadXdr, ScMap, ScMapEntry, ScString, ScSymbol, ScVal,
+    TransactionMeta, TransactionResultPair, TransactionResultResult, Validate, WriteXdr,
+};
 
 const STELLAR_XDR_VERSION: &str = "30.0.0";
 const MANIFEST_VERSION: &str = "0.1.0";
@@ -160,9 +163,168 @@ struct Built {
     bytes: Vec<u8>,
 }
 
+/// Extracts the Soroban return value of `tx_hash` from a saved
+/// LedgerCloseMeta. Before trusting the file it checks that the ledger
+/// sequence and ledger hash are the ones recorded at capture time and that
+/// the transaction succeeded. Returns the value and the ledger's protocol.
+fn extract_return_value(
+    lcm_bytes: &[u8],
+    ledger: u32,
+    ledger_hash: &str,
+    tx_hash: &str,
+) -> Result<(ScVal, u32), String> {
+    let lcm = LedgerCloseMeta::from_xdr(lcm_bytes, Limits::none())
+        .map_err(|e| format!("decode LedgerCloseMeta: {e}"))?;
+    let (header, txs): (_, Vec<(&TransactionResultPair, &TransactionMeta)>) = match &lcm {
+        LedgerCloseMeta::V0(m) => (
+            &m.ledger_header,
+            m.tx_processing
+                .iter()
+                .map(|t| (&t.result, &t.tx_apply_processing))
+                .collect(),
+        ),
+        LedgerCloseMeta::V1(m) => (
+            &m.ledger_header,
+            m.tx_processing
+                .iter()
+                .map(|t| (&t.result, &t.tx_apply_processing))
+                .collect(),
+        ),
+        LedgerCloseMeta::V2(m) => (
+            &m.ledger_header,
+            m.tx_processing
+                .iter()
+                .map(|t| (&t.result, &t.tx_apply_processing))
+                .collect(),
+        ),
+    };
+    if header.header.ledger_seq != ledger {
+        return Err(format!(
+            "ledger_seq is {}, capture says {ledger}",
+            header.header.ledger_seq
+        ));
+    }
+    if hex::encode(header.hash.0) != ledger_hash {
+        return Err(format!(
+            "ledger hash is {}, capture says {ledger_hash}",
+            hex::encode(header.hash.0)
+        ));
+    }
+    let (result, meta) = txs
+        .into_iter()
+        .find(|(r, _)| hex::encode(r.transaction_hash.0) == tx_hash)
+        .ok_or_else(|| format!("tx {tx_hash} not in ledger {ledger}"))?;
+    if !matches!(result.result.result, TransactionResultResult::TxSuccess(_)) {
+        return Err(format!("tx {tx_hash} did not succeed"));
+    }
+    let value = match meta {
+        TransactionMeta::V3(m) => m.soroban_meta.as_ref().map(|s| s.return_value.clone()),
+        TransactionMeta::V4(m) => m.soroban_meta.as_ref().and_then(|s| s.return_value.clone()),
+        _ => None,
+    }
+    .ok_or_else(|| format!("tx {tx_hash} has no Soroban return value"))?;
+    Ok((value, header.header.ledger_version))
+}
+
+/// Corpus entries captured from the network by capture/capture.mjs. The
+/// capture step saved raw LedgerCloseMeta files; everything here runs
+/// offline, so CI re-derives every captured entry from the saved meta.
+fn captured(corpus: &Path, synthetic: &[(&str, &str, Vec<u8>)]) -> Vec<(Value, Built)> {
+    let index = corpus.join("captured/captures.json");
+    let Ok(text) = fs::read_to_string(&index) else {
+        return Vec::new();
+    };
+    let doc: Value = serde_json::from_str(&text).expect("parse captures.json");
+    let mut out = Vec::new();
+
+    for c in doc["captures"].as_array().expect("captures") {
+        let s = |k: &str| c[k].as_str().unwrap_or_else(|| panic!("capture field {k}"));
+        let id = s("id");
+        let ledger = u32::try_from(c["ledger"].as_u64().expect("ledger")).expect("ledger fits u32");
+        let lcm_rel = s("ledger_close_meta");
+        let lcm =
+            fs::read(corpus.join(lcm_rel)).unwrap_or_else(|e| panic!("{id}: read {lcm_rel}: {e}"));
+        assert_eq!(
+            sha256_hex(&lcm),
+            s("ledger_close_meta_sha256"),
+            "{id}: LedgerCloseMeta file changed since capture"
+        );
+
+        let (value, protocol) = extract_return_value(&lcm, ledger, s("ledger_hash"), s("tx_hash"))
+            .unwrap_or_else(|e| panic!("{id}: {e}"));
+        value
+            .validate()
+            .unwrap_or_else(|e| panic!("{id}: host emitted an invalid ScVal: {e}"));
+        let bytes = value.to_xdr(Limits::none()).expect("encode");
+
+        let shape_of = s("shape_of");
+        let (_, shape_title, shape_bytes) = synthetic
+            .iter()
+            .find(|(sid, _, _)| *sid == shape_of)
+            .unwrap_or_else(|| panic!("{id}: unknown shape_of {shape_of}"));
+
+        let rel = format!("entries/{id}.xdr");
+        let mut entry = json!({
+            "id": id,
+            "title": format!("{shape_title}, captured on testnet"),
+            "description": format!(
+                "Return value of a real testnet transaction, extracted from the \
+                 LedgerCloseMeta stellar-core produced for ledger {ledger}. Same \
+                 shape as {shape_of}."
+            ),
+            "xdr_type": "ScVal",
+            "file": rel,
+            "encoding": "raw",
+            "byte_length": bytes.len(),
+            "sha256": sha256_hex(&bytes),
+            "cap": [CAP_46_01],
+            "protocol_version": {"introduced": 20, "observed": protocol},
+            "synthetic": false,
+            "source": {
+                "kind": "testnet",
+                "method": "TransactionMeta.soroban_meta.return_value of tx_hash, extracted from the \
+                    LedgerCloseMeta returned by RPC getLedgers (capture/capture.mjs, then \
+                    generator/src/main.rs extract_return_value)",
+                "network_passphrase": s("network_passphrase"),
+                "ledger": ledger,
+                "ledger_hash": s("ledger_hash"),
+                "tx_hash": s("tx_hash"),
+                "contract_id": s("contract_id"),
+                "ledger_close_meta": {
+                    "file": lcm_rel,
+                    "byte_length": lcm.len(),
+                    "sha256": sha256_hex(&lcm),
+                },
+            },
+            "tags": ["scmap", "native-conversion", "key-collision", "captured"],
+            "related_issues": [JS_1789],
+            "expected": {
+                "decoded": typed(&value),
+                "xdr_json": serde_json::to_value(&value).expect("xdr-json"),
+                "base64": base64_encode(&bytes),
+            },
+        });
+        if bytes == *shape_bytes {
+            entry["same_bytes_as"] = json!(shape_of);
+        }
+        if let Some(n) = distinct_keys(&value) {
+            entry["native_conversion"] = json!({"rule": "preserve-or-reject", "distinct_keys": n});
+        }
+        out.push((
+            entry,
+            Built {
+                file: corpus.join(&rel),
+                bytes,
+            },
+        ));
+    }
+    out
+}
+
 fn build(corpus: &Path) -> (Vec<Built>, String) {
     let mut built = Vec::new();
     let mut entries = Vec::new();
+    let mut synthetic: Vec<(&str, &str, Vec<u8>)> = Vec::new();
 
     for s in specs() {
         let bytes = s.value.to_xdr(Limits::none()).expect("encode");
@@ -213,10 +375,16 @@ fn build(corpus: &Path) -> (Vec<Built>, String) {
             });
         }
         entries.push(entry);
+        synthetic.push((s.id, s.title, bytes.clone()));
         built.push(Built {
             file: corpus.join(&rel),
             bytes,
         });
+    }
+
+    for (entry, b) in captured(corpus, &synthetic) {
+        entries.push(entry);
+        built.push(b);
     }
 
     let manifest = json!({

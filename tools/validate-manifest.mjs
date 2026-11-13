@@ -44,6 +44,23 @@ for (const e of manifest.entries ?? []) {
   const sha = createHash("sha256").update(bytes).digest("hex");
   if (sha !== e.sha256) errors.push(`${e.id}: sha256 mismatch`);
   if (bytes.toString("base64") !== e.expected?.base64) errors.push(`${e.id}: expected.base64 does not match the file`);
+
+  // Captured entries: the saved LedgerCloseMeta they came from must be intact.
+  const lcm = e.source?.ledger_close_meta;
+  if (lcm) {
+    try {
+      const raw = readFileSync(join(corpus, lcm.file));
+      if (raw.length !== lcm.byte_length) errors.push(`${e.id}: ${lcm.file} has ${raw.length} bytes, manifest says ${lcm.byte_length}`);
+      if (createHash("sha256").update(raw).digest("hex") !== lcm.sha256) errors.push(`${e.id}: ${lcm.file} sha256 mismatch`);
+    } catch {
+      errors.push(`${e.id}: missing ${lcm.file}`);
+    }
+  }
+  if (e.same_bytes_as) {
+    const twin = (manifest.entries ?? []).find((x) => x.id === e.same_bytes_as);
+    if (!twin) errors.push(`${e.id}: same_bytes_as names unknown entry ${e.same_bytes_as}`);
+    else if (twin.sha256 !== e.sha256) errors.push(`${e.id}: same_bytes_as ${e.same_bytes_as} but the bytes differ`);
+  }
 }
 
 for (const f of readdirSync(join(corpus, "entries"))) {

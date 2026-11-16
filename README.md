@@ -66,8 +66,14 @@ accepts the reversed pair with a pool ID the network does not use. 17.2.0
 and 17.2.1 accept `"0x10"`, `"016"` and `" 16 "` as a muxed ID: the address
 encodes 16 while `id()` reports the string as typed. See
 [FINDING-0003](findings/FINDING-0003-js-issuer-ordering.md) and
-[FINDING-0004](findings/FINDING-0004-js-noncanonical-muxed-id.md). API
-vectors run on the JavaScript SDK only so far.
+[FINDING-0004](findings/FINDING-0004-js-noncanonical-muxed-id.md).
+
+The Go SDK (v0.9.0) and the Python SDK (17.0.1) run the same vectors. Both
+order the liquidity-pool pair as the network does and produce the pool ID
+rs-stellar-xdr computes. Both take a muxed ID as an integer, so the
+non-canonical string vectors have no matching API there and are reported as
+such; the canonical control passes. The Rust runner does not run API
+vectors yet.
 
 ## Core-emitted entries
 

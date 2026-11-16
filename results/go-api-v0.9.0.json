@@ -1,0 +1,44 @@
+{
+  "results": [
+    {
+      "id": "APIVEC-LPOOL-ISSUER-ORDER-0001",
+      "status": "ok",
+      "detail": ""
+    },
+    {
+      "id": "APIVEC-LPOOL-ISSUER-ORDER-0002",
+      "status": "ok",
+      "detail": ""
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0001",
+      "status": "ok",
+      "detail": ""
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0002",
+      "status": "n/a",
+      "detail": "the Go SDK takes a muxed ID as uint64; there is no string input to test"
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0003",
+      "status": "n/a",
+      "detail": "the Go SDK takes a muxed ID as uint64; there is no string input to test"
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0004",
+      "status": "n/a",
+      "detail": "the Go SDK takes a muxed ID as uint64; there is no string input to test"
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0005",
+      "status": "n/a",
+      "detail": "the Go SDK takes a muxed ID as uint64; there is no string input to test"
+    }
+  ],
+  "runner": "go",
+  "runtime": "go1.25.0",
+  "sdk": "github.com/stellar/go-stellar-sdk",
+  "sdk_version": "v0.9.0",
+  "suite": "api"
+}

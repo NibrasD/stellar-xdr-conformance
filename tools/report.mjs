@@ -80,7 +80,7 @@ for (const run of apiRuns) {
   }
 }
 
-const apiCell = (r) => (!r ? "missing" : r.status === "defect" ? "**defect**" : r.status === "ok" ? "correct" : "not run");
+const apiCell = (r) => (!r ? "missing" : r.status === "defect" ? "**defect**" : r.status === "ok" ? "correct" : "no matching API");
 const apiHeader = ["API vector", "Expected", ...apiRuns.map((r) => `${r.runner}<br>\`${r.sdk}\` ${r.sdk_version}`)];
 const apiRows = apiVectors.map((v) => [
   `\`${v.id}\`<br>${v.title}`,

@@ -58,15 +58,15 @@ Decode, byte-exact re-encode, decoded structure against the manifest, and xdr-js
 
 Cases that exercise an SDK's builder or parser API rather than its decoder. Expected values come from rs-stellar-xdr (`corpus/api-vectors.json`).
 
-| API vector | Expected | js<br>`@stellar/stellar-sdk` 17.2.0 | js<br>`@stellar/stellar-sdk` 17.2.1 | js<br>`@stellar/stellar-sdk` 17.4.0 |
-| --- | --- | --- | --- | --- |
-| `APIVEC-LPOOL-ISSUER-ORDER-0001`<br>Liquidity pool asset pair in network order, where strkey text order is the reverse | accept | **defect** | correct | correct |
-| `APIVEC-LPOOL-ISSUER-ORDER-0002`<br>The same pair reversed: sorted as strkey text, out of order for the network | reject | **defect** | correct | correct |
-| `APIVEC-MUXED-ID-0001`<br>Canonical decimal muxed ID (control) | accept | correct | correct | correct |
-| `APIVEC-MUXED-ID-0002`<br>Hexadecimal spelling of muxed ID 16 | reject or canonical | **defect** | **defect** | correct |
-| `APIVEC-MUXED-ID-0003`<br>Leading-zero spelling of muxed ID 16 | reject or canonical | **defect** | **defect** | correct |
-| `APIVEC-MUXED-ID-0004`<br>Whitespace-padded spelling of muxed ID 16 | reject or canonical | **defect** | **defect** | correct |
-| `APIVEC-MUXED-ID-0005`<br>Empty string as a muxed ID | reject | **defect** | **defect** | correct |
+| API vector | Expected | go<br>`github.com/stellar/go-stellar-sdk` v0.9.0 | js<br>`@stellar/stellar-sdk` 17.2.0 | js<br>`@stellar/stellar-sdk` 17.2.1 | js<br>`@stellar/stellar-sdk` 17.4.0 | python<br>`stellar-sdk` 17.0.1 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `APIVEC-LPOOL-ISSUER-ORDER-0001`<br>Liquidity pool asset pair in network order, where strkey text order is the reverse | accept | correct | **defect** | correct | correct | correct |
+| `APIVEC-LPOOL-ISSUER-ORDER-0002`<br>The same pair reversed: sorted as strkey text, out of order for the network | reject | correct | **defect** | correct | correct | correct |
+| `APIVEC-MUXED-ID-0001`<br>Canonical decimal muxed ID (control) | accept | correct | correct | correct | correct | correct |
+| `APIVEC-MUXED-ID-0002`<br>Hexadecimal spelling of muxed ID 16 | reject or canonical | no matching API | **defect** | **defect** | correct | no matching API |
+| `APIVEC-MUXED-ID-0003`<br>Leading-zero spelling of muxed ID 16 | reject or canonical | no matching API | **defect** | **defect** | correct | no matching API |
+| `APIVEC-MUXED-ID-0004`<br>Whitespace-padded spelling of muxed ID 16 | reject or canonical | no matching API | **defect** | **defect** | correct | no matching API |
+| `APIVEC-MUXED-ID-0005`<br>Empty string as a muxed ID | reject | no matching API | **defect** | **defect** | correct | no matching API |
 
 - **js 17.2.0**, `APIVEC-LPOOL-ISSUER-ORDER-0001`: rejected a pair the network accepts: Assets are not in lexicographic order
 - **js 17.2.0**, `APIVEC-LPOOL-ISSUER-ORDER-0002`: accepted an out-of-order pair as pool 7ac81f31e7193452a3d6b5648ef6009282ba2e39b86d145734d7ed35a9c4a900

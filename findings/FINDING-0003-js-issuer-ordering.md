@@ -38,5 +38,7 @@ cd runners/js && npm ci && node api.mjs
 
 - The upstream fix also changed how ScVal map keys are sorted
   (`scvSortedMap`). These vectors cover the issuer-ordering half only.
-- The RFP notes that the Go SDK had already fixed the same bug. A Go runner
-  for API vectors is not written yet, so that is not checked here.
+- The same two vectors run on the Go SDK (v0.9.0) and the Python SDK
+  (17.0.1). Both accept the pair in network order with the expected pool
+  ID and reject the reversed pair, consistent with the RFP's note that the
+  Go SDK had already fixed this bug.

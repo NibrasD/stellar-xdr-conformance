@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/NibrasD/stellar-xdr-conformance/corpus/schema/api-vectors.schema.json",
+  "title": "Stellar XDR conformance API vectors",
+  "description": "SDK API-level cases: inputs to a builder or parser API and the outcome every SDK must produce. Expected values are computed with rs-stellar-xdr.",
+  "type": "object",
+  "required": ["description", "vectors"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "description": { "type": "string" },
+    "vectors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "title", "cap", "input", "expected"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^APIVEC(-[A-Z0-9]+)+-\\d{4}$" },
+          "kind": { "enum": ["liquidity_pool_asset", "muxed_account_id"] },
+          "title": { "type": "string", "minLength": 1 },
+          "cap": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^CAP-\\d{4}(-\\d{2})?$" } },
+          "related_issues": { "type": "array", "items": { "type": "string", "format": "uri" } },
+          "input": { "type": "object" },
+          "expected": {
+            "type": "object",
+            "required": ["outcome"],
+            "additionalProperties": false,
+            "properties": {
+              "outcome": {
+                "description": "accept: the SDK must accept the input and produce the expected value. reject: it must refuse the input. reject_or_canonical: it must refuse the input or normalize it to the canonical value.",
+                "enum": ["accept", "reject", "reject_or_canonical"]
+              },
+              "pool_id": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+              "canonical_id": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+              "address": { "type": "string", "pattern": "^M[A-Z2-7]{68}$" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,21 @@
 {
-  "description": "Native-conversion outcomes that are known and accepted. Any outcome not listed here must be 'preserved', 'rejected' or 'n/a'. A listed outcome that stops occurring also fails CI, so a fix upstream is noticed and this file is updated in the same pull request.",
+  "description": "Native-conversion outcomes that are known and accepted. Any outcome not listed here must be 'preserved', 'rejected' or 'n/a'. A listed outcome that stops occurring also fails CI, so a fix upstream is noticed and this file is updated in the same pull request. api_outcomes does the same for API vectors: a vector not listed there must not be a defect.",
   "outcomes": [
+    {
+      "runner": "js",
+      "sdk_version": "17.2.0",
+      "entries": [
+        "SCVAL-MAP-KEYCOLLIDE-0001",
+        "SCVAL-MAP-KEYCOLLIDE-0002",
+        "SCVAL-MAP-KEYCOLLIDE-0004",
+        "SCVAL-MAP-KEYCOLLIDE-0101",
+        "SCVAL-MAP-KEYCOLLIDE-0102",
+        "SCVAL-MAP-KEYCOLLIDE-0104"
+      ],
+      "native": "silent-loss",
+      "reason": "Deliberate pre-fix pin (last release before the js-stellar-sdk#1766 fix). Also reproduces js-stellar-sdk#1789; fixed in 17.3.0.",
+      "finding": "findings/FINDING-0001-js-scvaltonative-key-collision.md"
+    },
     {
       "runner": "js",
       "sdk_version": "17.2.1",
@@ -30,6 +45,45 @@
       "native": "silent-loss",
       "reason": "Sibling of js-stellar-sdk#1789 in the Python SDK, reported upstream as StellarCN/py-stellar-base#1250; fix PR #1252 not merged as of 2026-11-13.",
       "finding": "findings/FINDING-0002-python-to-native-key-collision.md"
+    }
+  ],
+  "api_outcomes": [
+    {
+      "runner": "js",
+      "sdk_version": "17.2.0",
+      "vectors": [
+        "APIVEC-LPOOL-ISSUER-ORDER-0001",
+        "APIVEC-LPOOL-ISSUER-ORDER-0002"
+      ],
+      "status": "defect",
+      "reason": "Deliberate pre-fix pin. Reproduces js-stellar-sdk#1766 (issuers ordered as strkey text); fixed in 17.2.1.",
+      "finding": "findings/FINDING-0003-js-issuer-ordering.md"
+    },
+    {
+      "runner": "js",
+      "sdk_version": "17.2.0",
+      "vectors": [
+        "APIVEC-MUXED-ID-0002",
+        "APIVEC-MUXED-ID-0003",
+        "APIVEC-MUXED-ID-0004",
+        "APIVEC-MUXED-ID-0005"
+      ],
+      "status": "defect",
+      "reason": "Deliberate pre-fix pin. Reproduces js-stellar-sdk#1785 (non-canonical muxed IDs accepted).",
+      "finding": "findings/FINDING-0004-js-noncanonical-muxed-id.md"
+    },
+    {
+      "runner": "js",
+      "sdk_version": "17.2.1",
+      "vectors": [
+        "APIVEC-MUXED-ID-0002",
+        "APIVEC-MUXED-ID-0003",
+        "APIVEC-MUXED-ID-0004",
+        "APIVEC-MUXED-ID-0005"
+      ],
+      "status": "defect",
+      "reason": "Deliberate pre-fix pin. Reproduces js-stellar-sdk#1785 (non-canonical muxed IDs accepted).",
+      "finding": "findings/FINDING-0004-js-noncanonical-muxed-id.md"
     }
   ]
 }

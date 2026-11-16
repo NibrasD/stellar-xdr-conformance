@@ -8,10 +8,11 @@ repository turns each such bug into a corpus entry with expected decoded
 values, so one SDK's fix becomes every SDK's regression test.
 
 > **Status:** proof of concept for the SCF RFP *XDR/CAP-Coverage Audit Tool
-> and Indexer-Hardening Guide*. It covers one shape family (SCMap key
-> collisions) across four SDKs, with both synthetic entries and entries
-> captured from real testnet ledgers. The [roadmap](#roadmap) lists what the
-> full project adds.
+> and Indexer-Hardening Guide*. It covers one decode-side shape family
+> (SCMap key collisions) across four SDKs, with synthetic entries and entries
+> captured from real testnet ledgers, plus encode-side API vectors for the
+> JavaScript SDK. It reproduces the three SDK sightings the RFP names for the
+> conformance runner: js-stellar-sdk #1766, #1785 and #1789.
 
 ## Current results
 
@@ -35,7 +36,7 @@ Every SDK decodes all nine entries, re-encodes them byte for byte, and
 (where it exposes xdr-json) produces the same JSON as rs-stellar-xdr. The
 divergence is in conversion to native language values:
 
-- **JavaScript 17.2.1** reproduces
+- **JavaScript 17.2.1** (and 17.2.0, also pinned) reproduces
   [js-stellar-sdk#1789](https://github.com/stellar/js-stellar-sdk/issues/1789).
   17.3.0 and later raise an error instead.
   See [FINDING-0001](findings/FINDING-0001-js-scvaltonative-key-collision.md).
@@ -47,6 +48,26 @@ divergence is in conversion to native language values:
   `bool`/`u32` case also shows why each SDK needs the whole corpus: it does
   not collide in JavaScript.
   See [FINDING-0002](findings/FINDING-0002-python-to-native-key-collision.md).
+
+### API vectors
+
+Some defects are on the encode side: the SDK refuses a value the network
+accepts, or accepts an input and then encodes a different value. These are
+tested with API vectors (`corpus/api-vectors.json`), whose expected values
+are computed with rs-stellar-xdr.
+
+| Sighting | Vectors | JS 17.2.0 | JS 17.2.1 | JS 17.4.0 |
+| --- | --- | --- | --- | --- |
+| [js-stellar-sdk#1766](https://github.com/stellar/js-stellar-sdk/pull/1766): issuers ordered as strkey text | `APIVEC-LPOOL-ISSUER-ORDER-0001`, `-0002` | **defect** | correct | correct |
+| [js-stellar-sdk#1785](https://github.com/stellar/js-stellar-sdk/issues/1785): non-canonical muxed IDs accepted | `APIVEC-MUXED-ID-0002` to `-0005` | **defect** | **defect** | correct |
+
+17.2.0 rejects a liquidity-pool asset pair that is in network order, and
+accepts the reversed pair with a pool ID the network does not use. 17.2.0
+and 17.2.1 accept `"0x10"`, `"016"` and `" 16 "` as a muxed ID: the address
+encodes 16 while `id()` reports the string as typed. See
+[FINDING-0003](findings/FINDING-0003-js-issuer-ordering.md) and
+[FINDING-0004](findings/FINDING-0004-js-noncanonical-muxed-id.md). API
+vectors run on the JavaScript SDK only so far.
 
 ## Core-emitted entries
 
@@ -83,7 +104,7 @@ and the saved meta files are in `corpus/manifest.json` and
 Testnet is reset from time to time, after which these ledgers can no longer
 be fetched. The saved `LedgerCloseMeta` files, with their SHA-256 in the
 manifest, are the durable record. Comparison with stellar-core's
-`--check-lcm` goldens is not done yet; it is on the [roadmap](#roadmap).
+`--check-lcm` goldens is not done yet.
 
 ## How it works
 
@@ -142,7 +163,7 @@ run on its own; see the comment at the top of its source file.
 ## Repository layout
 
 ```
-corpus/          XDR entries, manifest.json, its JSON Schema, captured LedgerCloseMeta
+corpus/          XDR entries, manifest.json, api-vectors.json, JSON Schemas, captured LedgerCloseMeta
 generator/       Rust generator: synthetic entries, and offline extraction of captured ones
 capture/         Test contract and one-off testnet capture script (not run in CI)
 runners/         One runner per SDK: rust, go, js, python
@@ -174,23 +195,6 @@ A runner reads `corpus/manifest.json`, runs each entry and writes
 
 `native` is one of `preserved`, `rejected`, `silent-loss`, `unexpected` or
 `n/a`. Add the runner to `scripts/run-all.sh` and the report picks it up.
-
-## Roadmap
-
-Mapped to the RFP milestones. None of this is built yet.
-
-1. **Corpus and guide.** Per-CAP coverage, including entries captured from
-   testnet and mainnet history and from a local stellar-core, reproducible
-   for both passphrases and checked against stellar-core's `--check-lcm`
-   goldens. Indexer-hardening guide.
-2. **Replay harness and conformance.** `LedgerCloseMeta` replay through a
-   documented adapter interface (mock `getLedgers` first), a reference
-   adapter for wallet-backend, and the remaining shapes from the RFP:
-   muxed and signed-payload addresses, maximum-length vectors, nested
-   authorization trees, issuer ordering.
-3. **Linter** for the three ingestion mistakes the RFP lists.
-4. **Production release** with Protocol 30 coverage and a maintenance plan
-   through the next protocol upgrade.
 
 ## License
 

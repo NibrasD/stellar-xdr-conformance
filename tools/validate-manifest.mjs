@@ -67,9 +67,22 @@ for (const f of readdirSync(join(corpus, "entries"))) {
   if (!listed.has(`entries/${f}`)) errors.push(`entries/${f} is not listed in the manifest`);
 }
 
+// API vectors: schema and unique IDs.
+const apiSchema = JSON.parse(readFileSync(join(corpus, "schema/api-vectors.schema.json"), "utf8"));
+const api = JSON.parse(readFileSync(join(corpus, "api-vectors.json"), "utf8"));
+const validateApi = ajv.compile(apiSchema);
+if (!validateApi(api)) {
+  for (const e of validateApi.errors) errors.push(`api-vectors schema: ${e.instancePath || "/"} ${e.message}`);
+}
+const apiIds = new Set();
+for (const v of api.vectors ?? []) {
+  if (apiIds.has(v.id)) errors.push(`${v.id}: duplicate api vector id`);
+  apiIds.add(v.id);
+}
+
 if (errors.length) {
   for (const e of errors) console.error(e);
   console.error(`\nmanifest invalid: ${errors.length} problem(s)`);
   process.exit(1);
 }
-console.log(`manifest valid: ${manifest.entries.length} entries, schema and bytes agree`);
+console.log(`manifest valid: ${manifest.entries.length} entries, schema and bytes agree; ${api.vectors.length} API vectors valid`);

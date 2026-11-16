@@ -82,3 +82,25 @@ something core really emits.
 To add a captured entry, extend `capture/capture.mjs` (or add a capture for
 an existing transaction), run it once, then run `cargo run -p generator`
 and commit the saved meta, `captures.json`, the entry and the manifest.
+
+## API vectors
+
+`corpus/api-vectors.json` holds cases that exercise an SDK's builder or
+parser API rather than its decoder. Its schema is
+[`corpus/schema/api-vectors.schema.json`](../corpus/schema/api-vectors.schema.json).
+The generator writes it (`generator/src/api_vectors.rs`) and computes every
+expected value with rs-stellar-xdr.
+
+| Field | Meaning |
+| --- | --- |
+| `id` | Stable ID, `APIVEC-<FAMILY>-<NNNN>`. |
+| `kind` | Which API the vector exercises: `liquidity_pool_asset` or `muxed_account_id`. A runner reports `n/a` for a kind it does not implement. |
+| `cap`, `related_issues` | As for corpus entries. |
+| `input` | The arguments, in language-neutral form. |
+| `expected.outcome` | `accept`: the SDK must accept the input and produce the expected value. `reject`: it must refuse the input. `reject_or_canonical`: it must refuse the input or normalize it to the canonical value. |
+| `expected.pool_id`, `expected.canonical_id`, `expected.address` | The value an accepting SDK must produce. |
+
+A runner writes `results/<runner>-api-<version>.json` with `"suite": "api"`
+and one `{ "id", "status", "detail" }` per vector, where `status` is `ok`,
+`defect` or `n/a`. Known defects are listed under `api_outcomes` in
+`expectations/known-outcomes.json`.

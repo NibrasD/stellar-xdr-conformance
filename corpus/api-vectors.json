@@ -1,0 +1,155 @@
+{
+  "$schema": "./schema/api-vectors.schema.json",
+  "description": "SDK API-level cases. Expected values are computed with rs-stellar-xdr by generator/src/api_vectors.rs. Outcomes: accept (the SDK must accept the input and produce the expected value), reject (the SDK must refuse it), reject_or_canonical (the SDK must refuse it or normalize it to the canonical value; accepting it and reporting a different value is a defect).",
+  "vectors": [
+    {
+      "id": "APIVEC-LPOOL-ISSUER-ORDER-0001",
+      "kind": "liquidity_pool_asset",
+      "title": "Liquidity pool asset pair in network order, where strkey text order is the reverse",
+      "cap": [
+        "CAP-0038"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/pull/1766"
+      ],
+      "input": {
+        "asset_a": {
+          "code": "USD",
+          "issuer": "GCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUTRL"
+        },
+        "asset_b": {
+          "code": "USD",
+          "issuer": "GC5Q7OZUWPM2AHV6K4KT37VXGO2HLGQZOP56XRGWF26JP4NLNSMSE22I"
+        },
+        "fee": 30
+      },
+      "expected": {
+        "outcome": "accept",
+        "pool_id": "f1bacc761f2baf2cc4a938a929011c9a8f4b75fd589f7d8af8907d2aeffd41d3"
+      }
+    },
+    {
+      "id": "APIVEC-LPOOL-ISSUER-ORDER-0002",
+      "kind": "liquidity_pool_asset",
+      "title": "The same pair reversed: sorted as strkey text, out of order for the network",
+      "cap": [
+        "CAP-0038"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/pull/1766"
+      ],
+      "input": {
+        "asset_a": {
+          "code": "USD",
+          "issuer": "GC5Q7OZUWPM2AHV6K4KT37VXGO2HLGQZOP56XRGWF26JP4NLNSMSE22I"
+        },
+        "asset_b": {
+          "code": "USD",
+          "issuer": "GCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUTRL"
+        },
+        "fee": 30
+      },
+      "expected": {
+        "outcome": "reject"
+      }
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0001",
+      "kind": "muxed_account_id",
+      "title": "Canonical decimal muxed ID (control)",
+      "cap": [
+        "CAP-0027"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1785"
+      ],
+      "input": {
+        "account": "GCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUTRL",
+        "id": "16"
+      },
+      "expected": {
+        "outcome": "accept",
+        "canonical_id": "16",
+        "address": "MCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUAAAAAAAAAAACBKZE"
+      }
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0002",
+      "kind": "muxed_account_id",
+      "title": "Hexadecimal spelling of muxed ID 16",
+      "cap": [
+        "CAP-0027"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1785"
+      ],
+      "input": {
+        "account": "GCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUTRL",
+        "id": "0x10"
+      },
+      "expected": {
+        "outcome": "reject_or_canonical",
+        "canonical_id": "16",
+        "address": "MCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUAAAAAAAAAAACBKZE"
+      }
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0003",
+      "kind": "muxed_account_id",
+      "title": "Leading-zero spelling of muxed ID 16",
+      "cap": [
+        "CAP-0027"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1785"
+      ],
+      "input": {
+        "account": "GCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUTRL",
+        "id": "016"
+      },
+      "expected": {
+        "outcome": "reject_or_canonical",
+        "canonical_id": "16",
+        "address": "MCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUAAAAAAAAAAACBKZE"
+      }
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0004",
+      "kind": "muxed_account_id",
+      "title": "Whitespace-padded spelling of muxed ID 16",
+      "cap": [
+        "CAP-0027"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1785"
+      ],
+      "input": {
+        "account": "GCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUTRL",
+        "id": " 16 "
+      },
+      "expected": {
+        "outcome": "reject_or_canonical",
+        "canonical_id": "16",
+        "address": "MCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUAAAAAAAAAAACBKZE"
+      }
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0005",
+      "kind": "muxed_account_id",
+      "title": "Empty string as a muxed ID",
+      "cap": [
+        "CAP-0027"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1785"
+      ],
+      "input": {
+        "account": "GCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUTRL",
+        "id": ""
+      },
+      "expected": {
+        "outcome": "reject"
+      }
+    }
+  ]
+}

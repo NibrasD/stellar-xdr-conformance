@@ -8,17 +8,17 @@ Corpus: 9 entries, manifest 0.1.0, generated with rs-stellar-xdr 30.0.0.
 
 Rule for every map entry: the SDK's conversion to native values must keep every entry or raise an error. Returning fewer entries without an error is a defect.
 
-| Corpus entry | rust<br>`stellar-xdr` 30.0.0 | go<br>`github.com/stellar/go-stellar-sdk` v0.9.0 | js<br>`@stellar/stellar-sdk` 17.2.1 | js<br>`@stellar/stellar-sdk` 17.4.0 | python<br>`stellar-sdk` 17.0.1 |
-| --- | --- | --- | --- | --- | --- |
-| `SCVAL-MAP-KEYCOLLIDE-0001`<br>ScMap with u32(1) and symbol("1") keys | no native conversion | no native conversion | **loses entries silently** | raises an error | keeps all entries |
-| `SCVAL-MAP-KEYCOLLIDE-0002`<br>ScMap with string("k") and symbol("k") keys | no native conversion | no native conversion | **loses entries silently** | raises an error | **loses entries silently** |
-| `SCVAL-MAP-KEYCOLLIDE-0003`<br>ScMap with bool(true) and u32(1) keys | no native conversion | no native conversion | keeps all entries | keeps all entries | **loses entries silently** |
-| `SCVAL-MAP-KEYCOLLIDE-0004`<br>ScMap with u32(1) and i64(1) keys | no native conversion | no native conversion | **loses entries silently** | raises an error | **loses entries silently** |
-| `SCVAL-MAP-CONTROL-0001`<br>ScMap with two distinct symbol keys (control) | no native conversion | no native conversion | keeps all entries | keeps all entries | keeps all entries |
-| `SCVAL-MAP-KEYCOLLIDE-0101`<br>ScMap with u32(1) and symbol("1") keys, captured on testnet | no native conversion | no native conversion | **loses entries silently** | raises an error | keeps all entries |
-| `SCVAL-MAP-KEYCOLLIDE-0102`<br>ScMap with string("k") and symbol("k") keys, captured on testnet | no native conversion | no native conversion | **loses entries silently** | raises an error | **loses entries silently** |
-| `SCVAL-MAP-KEYCOLLIDE-0103`<br>ScMap with bool(true) and u32(1) keys, captured on testnet | no native conversion | no native conversion | keeps all entries | keeps all entries | **loses entries silently** |
-| `SCVAL-MAP-KEYCOLLIDE-0104`<br>ScMap with u32(1) and i64(1) keys, captured on testnet | no native conversion | no native conversion | **loses entries silently** | raises an error | **loses entries silently** |
+| Corpus entry | rust<br>`stellar-xdr` 30.0.0 | go<br>`github.com/stellar/go-stellar-sdk` v0.9.0 | js<br>`@stellar/stellar-sdk` 17.2.0 | js<br>`@stellar/stellar-sdk` 17.2.1 | js<br>`@stellar/stellar-sdk` 17.4.0 | python<br>`stellar-sdk` 17.0.1 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `SCVAL-MAP-KEYCOLLIDE-0001`<br>ScMap with u32(1) and symbol("1") keys | no native conversion | no native conversion | **loses entries silently** | **loses entries silently** | raises an error | keeps all entries |
+| `SCVAL-MAP-KEYCOLLIDE-0002`<br>ScMap with string("k") and symbol("k") keys | no native conversion | no native conversion | **loses entries silently** | **loses entries silently** | raises an error | **loses entries silently** |
+| `SCVAL-MAP-KEYCOLLIDE-0003`<br>ScMap with bool(true) and u32(1) keys | no native conversion | no native conversion | keeps all entries | keeps all entries | keeps all entries | **loses entries silently** |
+| `SCVAL-MAP-KEYCOLLIDE-0004`<br>ScMap with u32(1) and i64(1) keys | no native conversion | no native conversion | **loses entries silently** | **loses entries silently** | raises an error | **loses entries silently** |
+| `SCVAL-MAP-CONTROL-0001`<br>ScMap with two distinct symbol keys (control) | no native conversion | no native conversion | keeps all entries | keeps all entries | keeps all entries | keeps all entries |
+| `SCVAL-MAP-KEYCOLLIDE-0101`<br>ScMap with u32(1) and symbol("1") keys, captured on testnet | no native conversion | no native conversion | **loses entries silently** | **loses entries silently** | raises an error | keeps all entries |
+| `SCVAL-MAP-KEYCOLLIDE-0102`<br>ScMap with string("k") and symbol("k") keys, captured on testnet | no native conversion | no native conversion | **loses entries silently** | **loses entries silently** | raises an error | **loses entries silently** |
+| `SCVAL-MAP-KEYCOLLIDE-0103`<br>ScMap with bool(true) and u32(1) keys, captured on testnet | no native conversion | no native conversion | keeps all entries | keeps all entries | keeps all entries | **loses entries silently** |
+| `SCVAL-MAP-KEYCOLLIDE-0104`<br>ScMap with u32(1) and i64(1) keys, captured on testnet | no native conversion | no native conversion | **loses entries silently** | **loses entries silently** | raises an error | **loses entries silently** |
 
 ## Codec checks
 
@@ -28,12 +28,19 @@ Decode, byte-exact re-encode, decoded structure against the manifest, and xdr-js
 | --- | --- | --- | --- |
 | rust 30.0.0 | rust (MSRV 1.87) | decode, roundtrip, structure, xdr_json | all pass |
 | go v0.9.0 | go1.25.0 | decode, roundtrip, structure | all pass |
+| js 17.2.0 | node 22.23.4 | decode, roundtrip, structure, xdr_json | all pass |
 | js 17.2.1 | node 22.23.4 | decode, roundtrip, structure, xdr_json | all pass |
 | js 17.4.0 | node 22.23.4 | decode, roundtrip, structure, xdr_json | all pass |
 | python 17.0.1 | python 3.13.18 | decode, roundtrip, structure, xdr_json | all pass |
 
 ## Divergences
 
+- **js 17.2.0**, `SCVAL-MAP-KEYCOLLIDE-0001`: scValToNative returned 1 of 2 entries without an error: {"1":20}
+- **js 17.2.0**, `SCVAL-MAP-KEYCOLLIDE-0002`: scValToNative returned 1 of 2 entries without an error: {"k":20}
+- **js 17.2.0**, `SCVAL-MAP-KEYCOLLIDE-0004`: scValToNative returned 1 of 2 entries without an error: {"1":20}
+- **js 17.2.0**, `SCVAL-MAP-KEYCOLLIDE-0101`: scValToNative returned 1 of 2 entries without an error: {"1":20}
+- **js 17.2.0**, `SCVAL-MAP-KEYCOLLIDE-0102`: scValToNative returned 1 of 2 entries without an error: {"k":20}
+- **js 17.2.0**, `SCVAL-MAP-KEYCOLLIDE-0104`: scValToNative returned 1 of 2 entries without an error: {"1":20}
 - **js 17.2.1**, `SCVAL-MAP-KEYCOLLIDE-0001`: scValToNative returned 1 of 2 entries without an error: {"1":20}
 - **js 17.2.1**, `SCVAL-MAP-KEYCOLLIDE-0002`: scValToNative returned 1 of 2 entries without an error: {"k":20}
 - **js 17.2.1**, `SCVAL-MAP-KEYCOLLIDE-0004`: scValToNative returned 1 of 2 entries without an error: {"1":20}
@@ -46,6 +53,31 @@ Decode, byte-exact re-encode, decoded structure against the manifest, and xdr-js
 - **python 17.0.1**, `SCVAL-MAP-KEYCOLLIDE-0102`: scval.to_native returned 1 of 2 entries without an error: {'k': 20}
 - **python 17.0.1**, `SCVAL-MAP-KEYCOLLIDE-0103`: scval.to_native returned 1 of 2 entries without an error: {True: 20}
 - **python 17.0.1**, `SCVAL-MAP-KEYCOLLIDE-0104`: scval.to_native returned 1 of 2 entries without an error: {1: 20}
+
+## API vectors
+
+Cases that exercise an SDK's builder or parser API rather than its decoder. Expected values come from rs-stellar-xdr (`corpus/api-vectors.json`).
+
+| API vector | Expected | js<br>`@stellar/stellar-sdk` 17.2.0 | js<br>`@stellar/stellar-sdk` 17.2.1 | js<br>`@stellar/stellar-sdk` 17.4.0 |
+| --- | --- | --- | --- | --- |
+| `APIVEC-LPOOL-ISSUER-ORDER-0001`<br>Liquidity pool asset pair in network order, where strkey text order is the reverse | accept | **defect** | correct | correct |
+| `APIVEC-LPOOL-ISSUER-ORDER-0002`<br>The same pair reversed: sorted as strkey text, out of order for the network | reject | **defect** | correct | correct |
+| `APIVEC-MUXED-ID-0001`<br>Canonical decimal muxed ID (control) | accept | correct | correct | correct |
+| `APIVEC-MUXED-ID-0002`<br>Hexadecimal spelling of muxed ID 16 | reject or canonical | **defect** | **defect** | correct |
+| `APIVEC-MUXED-ID-0003`<br>Leading-zero spelling of muxed ID 16 | reject or canonical | **defect** | **defect** | correct |
+| `APIVEC-MUXED-ID-0004`<br>Whitespace-padded spelling of muxed ID 16 | reject or canonical | **defect** | **defect** | correct |
+| `APIVEC-MUXED-ID-0005`<br>Empty string as a muxed ID | reject | **defect** | **defect** | correct |
+
+- **js 17.2.0**, `APIVEC-LPOOL-ISSUER-ORDER-0001`: rejected a pair the network accepts: Assets are not in lexicographic order
+- **js 17.2.0**, `APIVEC-LPOOL-ISSUER-ORDER-0002`: accepted an out-of-order pair as pool 7ac81f31e7193452a3d6b5648ef6009282ba2e39b86d145734d7ed35a9c4a900
+- **js 17.2.0**, `APIVEC-MUXED-ID-0002`: accepted "0x10": the address encodes ID 16 but id() reports "0x10"
+- **js 17.2.0**, `APIVEC-MUXED-ID-0003`: accepted "016": the address encodes ID 16 but id() reports "016"
+- **js 17.2.0**, `APIVEC-MUXED-ID-0004`: accepted " 16 ": the address encodes ID 16 but id() reports " 16 "
+- **js 17.2.0**, `APIVEC-MUXED-ID-0005`: accepted "" as ID "", address MCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUAAAAAAAAAAAABSIA
+- **js 17.2.1**, `APIVEC-MUXED-ID-0002`: accepted "0x10": the address encodes ID 16 but id() reports "0x10"
+- **js 17.2.1**, `APIVEC-MUXED-ID-0003`: accepted "016": the address encodes ID 16 but id() reports "016"
+- **js 17.2.1**, `APIVEC-MUXED-ID-0004`: accepted " 16 ": the address encodes ID 16 but id() reports " 16 "
+- **js 17.2.1**, `APIVEC-MUXED-ID-0005`: accepted "" as ID "", address MCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUAAAAAAAAAAAABSIA
 
 ## Status
 

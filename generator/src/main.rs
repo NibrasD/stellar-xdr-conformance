@@ -8,6 +8,8 @@
 //!   cargo run -p generator            # (re)write the corpus
 //!   cargo run -p generator -- --check # fail if the files on disk differ
 
+mod api_vectors;
+
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -431,6 +433,8 @@ fn main() -> ExitCode {
     let corpus = Path::new(env!("CARGO_MANIFEST_DIR")).join("../corpus");
     let manifest_path = corpus.join("manifest.json");
     let (built, manifest) = build(&corpus);
+    let api_path = corpus.join("api-vectors.json");
+    let api = api_vectors::build();
 
     if check {
         let mut drift = Vec::new();
@@ -441,6 +445,9 @@ fn main() -> ExitCode {
         }
         if fs::read_to_string(&manifest_path).ok().as_deref() != Some(manifest.as_str()) {
             drift.push(manifest_path.display().to_string());
+        }
+        if fs::read_to_string(&api_path).ok().as_deref() != Some(api.as_str()) {
+            drift.push(api_path.display().to_string());
         }
         if drift.is_empty() {
             println!(
@@ -461,6 +468,7 @@ fn main() -> ExitCode {
         fs::write(&b.file, &b.bytes).unwrap();
     }
     fs::write(&manifest_path, manifest).unwrap();
+    fs::write(&api_path, api).unwrap();
     println!(
         "wrote {} entries and {}",
         built.len(),

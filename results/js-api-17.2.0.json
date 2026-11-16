@@ -1,0 +1,44 @@
+{
+  "runner": "js",
+  "suite": "api",
+  "sdk": "@stellar/stellar-sdk",
+  "sdk_version": "17.2.0",
+  "runtime": "node 22.23.4",
+  "results": [
+    {
+      "id": "APIVEC-LPOOL-ISSUER-ORDER-0001",
+      "status": "defect",
+      "detail": "rejected a pair the network accepts: Assets are not in lexicographic order"
+    },
+    {
+      "id": "APIVEC-LPOOL-ISSUER-ORDER-0002",
+      "status": "defect",
+      "detail": "accepted an out-of-order pair as pool 7ac81f31e7193452a3d6b5648ef6009282ba2e39b86d145734d7ed35a9c4a900"
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0001",
+      "status": "ok",
+      "detail": ""
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0002",
+      "status": "defect",
+      "detail": "accepted \"0x10\": the address encodes ID 16 but id() reports \"0x10\""
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0003",
+      "status": "defect",
+      "detail": "accepted \"016\": the address encodes ID 16 but id() reports \"016\""
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0004",
+      "status": "defect",
+      "detail": "accepted \" 16 \": the address encodes ID 16 but id() reports \" 16 \""
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0005",
+      "status": "defect",
+      "detail": "accepted \"\" as ID \"\", address MCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUAAAAAAAAAAAABSIA"
+    }
+  ]
+}

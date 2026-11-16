@@ -16,15 +16,20 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const manifest = JSON.parse(readFileSync(join(root, "corpus/manifest.json"), "utf8"));
-const known = JSON.parse(readFileSync(join(root, "expectations/known-outcomes.json"), "utf8")).outcomes;
+const expectations = JSON.parse(readFileSync(join(root, "expectations/known-outcomes.json"), "utf8"));
+const known = expectations.outcomes;
+const knownApi = expectations.api_outcomes ?? [];
+const apiVectors = JSON.parse(readFileSync(join(root, "corpus/api-vectors.json"), "utf8")).vectors;
 
 const RUNNER_ORDER = ["rust", "go", "js", "python"];
-const runs = readdirSync(join(root, "results"))
+const allRuns = readdirSync(join(root, "results"))
   .filter((f) => f.endsWith(".json"))
   .map((f) => JSON.parse(readFileSync(join(root, "results", f), "utf8")))
   .sort((a, b) =>
     RUNNER_ORDER.indexOf(a.runner) - RUNNER_ORDER.indexOf(b.runner) ||
     a.sdk_version.localeCompare(b.sdk_version, undefined, { numeric: true }));
+const runs = allRuns.filter((r) => r.suite !== "api");
+const apiRuns = allRuns.filter((r) => r.suite === "api");
 
 if (runs.length === 0) {
   console.error("no results in results/: run the runners first");
@@ -57,6 +62,33 @@ for (const run of runs) {
     }
   }
 }
+
+// API vectors: a defect must be listed in api_outcomes, and a listed defect
+// must still occur.
+for (const run of apiRuns) {
+  const label = `${run.runner} ${run.sdk_version} (api)`;
+  const ids = new Set(run.results.map((r) => r.id));
+  for (const v of apiVectors) {
+    if (!ids.has(v.id)) problems.push(`${label}: no result for ${v.id}`);
+  }
+  for (const r of run.results) {
+    const k = knownApi.find((x) => x.runner === run.runner && x.sdk_version === run.sdk_version && x.vectors.includes(r.id));
+    if (k && r.status !== "defect") {
+      problems.push(`${label} ${r.id}: expected a defect (${k.reason}) but got ${r.status}. Update expectations/known-outcomes.json if this is an upstream fix.`);
+    }
+    if (!k && r.status === "defect") problems.push(`${label} ${r.id}: new defect. ${r.detail}`);
+  }
+}
+
+const apiCell = (r) => (!r ? "missing" : r.status === "defect" ? "**defect**" : r.status === "ok" ? "correct" : "not run");
+const apiHeader = ["API vector", "Expected", ...apiRuns.map((r) => `${r.runner}<br>\`${r.sdk}\` ${r.sdk_version}`)];
+const apiRows = apiVectors.map((v) => [
+  `\`${v.id}\`<br>${v.title}`,
+  v.expected.outcome.replaceAll("_", " "),
+  ...apiRuns.map((run) => apiCell(run.results.find((r) => r.id === v.id))),
+]);
+const apiDetails = apiRuns.flatMap((run) =>
+  run.results.filter((r) => r.status === "defect").map((r) => `- **${run.runner} ${run.sdk_version}**, \`${r.id}\`: ${r.detail}`));
 
 const cell = (r) => {
   if (!r) return "missing";
@@ -113,6 +145,16 @@ ${codecSummary.join("\n")}
 ## Divergences
 
 ${details.length ? details.join("\n") : "None."}
+
+## API vectors
+
+Cases that exercise an SDK's builder or parser API rather than its decoder. Expected values come from rs-stellar-xdr (\`corpus/api-vectors.json\`).
+
+${apiRuns.length ? `| ${apiHeader.join(" | ")} |
+| ${apiHeader.map(() => "---").join(" | ")} |
+${apiRows.map((r) => `| ${r.join(" | ")} |`).join("\n")}
+
+${apiDetails.length ? apiDetails.join("\n") : "No defects."}` : "No API-vector results."}
 
 ## Status
 

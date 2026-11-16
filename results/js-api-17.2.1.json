@@ -1,0 +1,44 @@
+{
+  "runner": "js",
+  "suite": "api",
+  "sdk": "@stellar/stellar-sdk",
+  "sdk_version": "17.2.1",
+  "runtime": "node 22.23.4",
+  "results": [
+    {
+      "id": "APIVEC-LPOOL-ISSUER-ORDER-0001",
+      "status": "ok",
+      "detail": ""
+    },
+    {
+      "id": "APIVEC-LPOOL-ISSUER-ORDER-0002",
+      "status": "ok",
+      "detail": ""
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0001",
+      "status": "ok",
+      "detail": ""
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0002",
+      "status": "defect",
+      "detail": "accepted \"0x10\": the address encodes ID 16 but id() reports \"0x10\""
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0003",
+      "status": "defect",
+      "detail": "accepted \"016\": the address encodes ID 16 but id() reports \"016\""
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0004",
+      "status": "defect",
+      "detail": "accepted \" 16 \": the address encodes ID 16 but id() reports \" 16 \""
+    },
+    {
+      "id": "APIVEC-MUXED-ID-0005",
+      "status": "defect",
+      "detail": "accepted \"\" as ID \"\", address MCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUAAAAAAAAAAAABSIA"
+    }
+  ]
+}

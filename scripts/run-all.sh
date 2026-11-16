@@ -23,7 +23,7 @@ echo "== runner: go"
 (cd runners/go && go run . -corpus ../../corpus -out ../../results)
 
 echo "== runner: js"
-(cd runners/js && npm ci --silent --no-audit --no-fund && node run.mjs)
+(cd runners/js && npm ci --silent --no-audit --no-fund && node run.mjs && node api.mjs)
 
 echo "== runner: python"
 (

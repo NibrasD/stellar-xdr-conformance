@@ -2,9 +2,14 @@
   "name": "stellar-xdr-conformance-js-runner",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.12.0" },
-  "scripts": { "start": "node run.mjs" },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "start": "node run.mjs"
+  },
   "dependencies": {
+    "sdk-17.2.0": "npm:@stellar/stellar-sdk@17.2.0",
     "sdk-17.2.1": "npm:@stellar/stellar-sdk@17.2.1",
     "sdk-17.4.0": "npm:@stellar/stellar-sdk@17.4.0"
   }

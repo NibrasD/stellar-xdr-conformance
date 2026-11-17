@@ -19,6 +19,7 @@ const manifest = JSON.parse(readFileSync(join(root, "corpus/manifest.json"), "ut
 const expectations = JSON.parse(readFileSync(join(root, "expectations/known-outcomes.json"), "utf8"));
 const known = expectations.outcomes;
 const knownApi = expectations.api_outcomes ?? [];
+const knownScenes = expectations.scene_outcomes ?? [];
 const apiVectors = JSON.parse(readFileSync(join(root, "corpus/api-vectors.json"), "utf8")).vectors;
 
 const RUNNER_ORDER = ["rust", "go", "js", "python"];
@@ -27,8 +28,10 @@ const allRuns = readdirSync(join(root, "results"))
   .map((f) => JSON.parse(readFileSync(join(root, "results", f), "utf8")))
   .sort((a, b) =>
     RUNNER_ORDER.indexOf(a.runner) - RUNNER_ORDER.indexOf(b.runner) ||
-    a.sdk_version.localeCompare(b.sdk_version, undefined, { numeric: true }));
-const runs = allRuns.filter((r) => r.suite !== "api");
+    (a.sdk_version ?? a.commit ?? "").localeCompare(b.sdk_version ?? b.commit ?? "", undefined, { numeric: true }) ||
+    String(Boolean(a.control_patch)).localeCompare(String(Boolean(b.control_patch))));
+const runs = allRuns.filter((r) => r.suite !== "api" && r.suite !== "scenes");
+const sceneRuns = allRuns.filter((r) => r.suite === "scenes");
 const apiRuns = allRuns.filter((r) => r.suite === "api");
 
 if (runs.length === 0) {
@@ -89,6 +92,22 @@ const apiRows = apiVectors.map((v) => [
 ]);
 const apiDetails = apiRuns.flatMap((run) =>
   run.results.filter((r) => r.status === "defect").map((r) => `- **${run.runner} ${run.sdk_version}**, \`${r.id}\`: ${r.detail}`));
+
+// Replay scenes: every result must match scene_outcomes for that commit
+// and mode (control or not).
+for (const run of sceneRuns) {
+  const control = Boolean(run.control_patch);
+  const label = `${run.runner} ${run.commit.slice(0, 7)}${control ? " (control)" : ""}`;
+  for (const r of run.results) {
+    const k = knownScenes.find((x) => x.target === run.runner && x.commit === run.commit && x.control === control && x.scenes.includes(r.id));
+    if (!k) problems.push(`${label} ${r.id}: no expected outcome in scene_outcomes (got ${r.status})`);
+    else if (k.status !== r.status) problems.push(`${label} ${r.id}: expected ${k.status} (${k.reason}) but got ${r.status}`);
+  }
+}
+const sceneRows = sceneRuns.flatMap((run) => run.results.map((r) => {
+  const missing = r.missing.map((m) => `${m.role} \`${m.address.slice(0, 6)}…\``).join(", ") || "none";
+  return `| \`${r.id}\` | ${run.runner} \`${run.commit.slice(0, 7)}\`${run.control_patch ? " + control patch" : ""} | **${r.status}** | ${missing} |`;
+}));
 
 const cell = (r) => {
   if (!r) return "missing";
@@ -155,6 +174,14 @@ ${apiRuns.length ? `| ${apiHeader.join(" | ")} |
 ${apiRows.map((r) => `| ${r.join(" | ")} |`).join("\n")}
 
 ${apiDetails.length ? apiDetails.join("\n") : "No defects."}` : "No API-vector results."}
+
+## Replay scenes
+
+Whole ledgers, with the participants an indexer must record derived from the ledger meta (\`corpus/scenes.json\`). Each scene is run through the indexer's own participant code at a pinned commit (\`repro/wallet-backend/run.sh\`).
+
+${sceneRows.length ? `| Scene | Indexer | Result | Missing participants |
+| --- | --- | --- | --- |
+${sceneRows.join("\n")}` : "No scene results."}
 
 ## Status
 

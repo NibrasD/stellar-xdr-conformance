@@ -1,0 +1,26 @@
+{
+  "description": "Real testnet scenes for the replay harness. Each LedgerCloseMeta was returned by RPC getLedgers for the ledger that included the transaction; the generator derives the expected participants from it offline.",
+  "captured_with": {
+    "script": "capture/capture-sponsor.mjs",
+    "sdk": "@stellar/stellar-sdk 17.4.0"
+  },
+  "scenes": [
+    {
+      "id": "SCENE-SPONSORED-CB-CLAIM-0001",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "rpc_url": "https://soroban-testnet.stellar.org",
+      "ledger": 5777140,
+      "ledger_hash": "f24402eff0e4486883064daf4490ebbab071acdf2e522354873295ae03724ae5",
+      "ledger_close_time": 1794909346,
+      "tx_hash": "dba24ee48dc9ac7049c2e9510694811d74d7b64dd7d6fd627993c5df715b9132",
+      "roles": {
+        "sponsor": "GCVW6YP3545RS2FNUYYDDNAGPRATBKODREAWKDD572V4JPBSFXMCSNMO",
+        "claimant": "GDETDVD2WYMQ6URIYL6NXKL5C2PMGYS4HNBJR6ZRGHYWXM343GAM2APL"
+      },
+      "setup_tx_hash": "7863f6b104c3365bd94b54d10f7050ee36b23c4714ce5c8aebc4994253c324f3",
+      "claimable_balance_id": "00000000c57bba90ed68bc5e5ff24142694dfe544ec8ac830507eb8c5e37d31819a3eab0",
+      "ledger_close_meta": "captured/testnet/ledger-5777140.lcm.xdr",
+      "ledger_close_meta_sha256": "7d41ef6ee589a884cdb6834fc034f6223173b287b7c78c0542fbd470d53746ca"
+    }
+  ]
+}

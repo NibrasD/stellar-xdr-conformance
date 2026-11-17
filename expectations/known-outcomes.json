@@ -1,5 +1,5 @@
 {
-  "description": "Native-conversion outcomes that are known and accepted. Any outcome not listed here must be 'preserved', 'rejected' or 'n/a'. A listed outcome that stops occurring also fails CI, so a fix upstream is noticed and this file is updated in the same pull request. api_outcomes does the same for API vectors: a vector not listed there must not be a defect.",
+  "description": "Native-conversion outcomes that are known and accepted. Any outcome not listed here must be 'preserved', 'rejected' or 'n/a'. A listed outcome that stops occurring also fails CI, so a fix upstream is noticed and this file is updated in the same pull request. api_outcomes does the same for API vectors: a vector not listed there must not be a defect. scene_outcomes lists the expected replay-scene result per indexer commit; any other result fails CI.",
   "outcomes": [
     {
       "runner": "js",
@@ -84,6 +84,30 @@
       "status": "defect",
       "reason": "Deliberate pre-fix pin. Reproduces js-stellar-sdk#1785 (non-canonical muxed IDs accepted).",
       "finding": "findings/FINDING-0004-js-noncanonical-muxed-id.md"
+    }
+  ],
+  "scene_outcomes": [
+    {
+      "target": "wallet-backend",
+      "commit": "3e22515a44979fdc3a558fda3991ca2b48e38cef",
+      "control": false,
+      "scenes": [
+        "SCENE-SPONSORED-CB-CLAIM-0001"
+      ],
+      "status": "dropped",
+      "reason": "wallet-backend#677 (open): participantsForMeta reads only the V0 Operations field, so the sponsor, changed only in the operation meta, is not recorded.",
+      "finding": "findings/FINDING-0005-wallet-backend-sponsor-participant.md"
+    },
+    {
+      "target": "wallet-backend",
+      "commit": "3e22515a44979fdc3a558fda3991ca2b48e38cef",
+      "control": true,
+      "scenes": [
+        "SCENE-SPONSORED-CB-CLAIM-0001"
+      ],
+      "status": "pass",
+      "reason": "Control: with repro/wallet-backend/control-677.patch the same code records the sponsor, which shows the comparison separates a correct participant set from a wrong one.",
+      "finding": "findings/FINDING-0005-wallet-backend-sponsor-participant.md"
     }
   ]
 }

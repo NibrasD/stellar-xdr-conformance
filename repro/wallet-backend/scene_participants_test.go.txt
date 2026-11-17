@@ -1,0 +1,92 @@
+// Copied into wallet-backend's internal/indexer/processors package by
+// run.sh, so it calls the indexer's own participant code, unmodified, at
+// the pinned commit. Not part of this repository's Go build (.txt suffix).
+
+package processors
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"io"
+	"os"
+	"path/filepath"
+	"sort"
+	"testing"
+
+	"github.com/stellar/go-stellar-sdk/ingest"
+	"github.com/stellar/go-stellar-sdk/xdr"
+)
+
+type xdrcScene struct {
+	ID     string `json:"id"`
+	Source struct {
+		NetworkPassphrase string `json:"network_passphrase"`
+		TxHash            string `json:"tx_hash"`
+		LedgerCloseMeta   struct {
+			File string `json:"file"`
+		} `json:"ledger_close_meta"`
+	} `json:"source"`
+}
+
+func TestXDRConformanceScenes(t *testing.T) {
+	corpus := os.Getenv("XDRC_CORPUS")
+	out := os.Getenv("XDRC_OUT")
+	if corpus == "" || out == "" {
+		t.Skip("XDRC_CORPUS and XDRC_OUT not set")
+	}
+	data, err := os.ReadFile(filepath.Join(corpus, "scenes.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var doc struct {
+		Scenes []xdrcScene `json:"scenes"`
+	}
+	if err := json.Unmarshal(data, &doc); err != nil {
+		t.Fatal(err)
+	}
+
+	recorded := map[string][]string{}
+	for _, s := range doc.Scenes {
+		raw, err := os.ReadFile(filepath.Join(corpus, s.Source.LedgerCloseMeta.File))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var lcm xdr.LedgerCloseMeta
+		if err := xdr.SafeUnmarshal(raw, &lcm); err != nil {
+			t.Fatalf("%s: decode LedgerCloseMeta: %v", s.ID, err)
+		}
+		reader, err := ingest.NewLedgerTransactionReaderFromLedgerCloseMeta(s.Source.NetworkPassphrase, lcm)
+		if err != nil {
+			t.Fatalf("%s: %v", s.ID, err)
+		}
+		found := false
+		for {
+			tx, err := reader.Read()
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			if err != nil {
+				t.Fatalf("%s: read: %v", s.ID, err)
+			}
+			if hex.EncodeToString(tx.Hash[:]) != s.Source.TxHash {
+				continue
+			}
+			found = true
+			set, err := NewParticipantsProcessor(s.Source.NetworkPassphrase).GetTransactionParticipants(tx)
+			if err != nil {
+				t.Fatalf("%s: GetTransactionParticipants: %v", s.ID, err)
+			}
+			got := set.ToSlice()
+			sort.Strings(got)
+			recorded[s.ID] = got
+		}
+		if !found {
+			t.Fatalf("%s: tx %s not in ledger", s.ID, s.Source.TxHash)
+		}
+	}
+	text, _ := json.MarshalIndent(recorded, "", "  ")
+	if err := os.WriteFile(out, append(text, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}

@@ -81,6 +81,15 @@ Cases that exercise an SDK's builder or parser API rather than its decoder. Expe
 - **js 17.2.1**, `APIVEC-MUXED-ID-0004`: accepted " 16 ": the address encodes ID 16 but id() reports " 16 "
 - **js 17.2.1**, `APIVEC-MUXED-ID-0005`: accepted "" as ID "", address MCVX2X5XG35YWAAPF6KN4CP77QXXTYUDNTYMKMJU4CRH5MHTDFJKUAAAAAAAAAAAABSIA
 
+## Replay scenes
+
+Whole ledgers, with the participants an indexer must record derived from the ledger meta (`corpus/scenes.json`). Each scene is run through the indexer's own participant code at a pinned commit (`repro/wallet-backend/run.sh`).
+
+| Scene | Indexer | Result | Missing participants |
+| --- | --- | --- | --- |
+| `SCENE-SPONSORED-CB-CLAIM-0001` | wallet-backend `3e22515` | **dropped** | sponsor `GCVW6Y…` |
+| `SCENE-SPONSORED-CB-CLAIM-0001` | wallet-backend `3e22515` + control patch | **pass** | none |
+
 ## Status
 
 Every outcome matches `expectations/known-outcomes.json`.

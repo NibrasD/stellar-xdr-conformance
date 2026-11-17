@@ -14,7 +14,8 @@ values, so one SDK's fix becomes every SDK's regression test.
 > (CAP-0040), captured from real testnet ledgers. Encode-side API vectors
 > run on the JavaScript, Go and Python SDKs. It reproduces the three SDK
 > sightings the RFP names for the conformance runner: js-stellar-sdk #1766,
-> #1785 and #1789.
+> #1785 and #1789. One replay scene runs through wallet-backend's own
+> participant code and reproduces wallet-backend #677.
 
 ## Current results
 
@@ -76,6 +77,29 @@ rs-stellar-xdr computes. Both take a muxed ID as an integer, so the
 non-canonical string vectors have no matching API there and are reported as
 such; the canonical control passes. The Rust runner does not run API
 vectors yet.
+
+## Replay scene: wallet-backend #677
+
+`SCENE-SPONSORED-CB-CLAIM-0001` is a whole testnet ledger (5777140,
+protocol 30) in which account C claims a claimable balance whose reserve
+account S sponsors. The claim names only C, but stellar-core updates S's
+account entry in the operation meta. The generator derives the
+participants from the meta (`corpus/scenes.json`), and
+`repro/wallet-backend/run.sh` runs wallet-backend's own
+`GetTransactionParticipants`, unmodified, on the same transaction:
+
+| Run | Result |
+| --- | --- |
+| wallet-backend `3e22515` | **dropped**: the sponsor is missing |
+| wallet-backend `3e22515` + a local control patch | pass |
+
+This reproduces the open issue
+[wallet-backend#677](https://github.com/stellar/wallet-backend/issues/677).
+The control patch, which reads participants from every change in the meta
+as the issue proposes, is ours and is not an upstream fix; it shows the
+comparison separates a correct result from a wrong one. This is a
+component-level check, not the full replay harness. See
+[FINDING-0005](findings/FINDING-0005-wallet-backend-sponsor-participant.md).
 
 ## Core-emitted entries
 
@@ -192,9 +216,10 @@ run on its own; see the comment at the top of its source file.
 ## Repository layout
 
 ```
-corpus/          XDR entries, manifest.json, api-vectors.json, JSON Schemas, captured LedgerCloseMeta
+corpus/          XDR entries, manifest.json, api-vectors.json, scenes.json, JSON Schemas, captured LedgerCloseMeta
 generator/       Rust generator: synthetic entries, and offline extraction of captured ones
-capture/         Test contract and one-off testnet capture script (not run in CI)
+capture/         Test contract and one-off testnet capture scripts (not run in CI)
+repro/           Reproductions against real indexer code at pinned commits
 runners/         One runner per SDK: rust, go, js, python
 tools/           Manifest validation and the report builder
 expectations/    Known, accepted outcomes with links to upstream issues

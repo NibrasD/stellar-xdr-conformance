@@ -1,0 +1,50 @@
+{
+  "$schema": "./schema/scenes.schema.json",
+  "description": "Replay scenes: whole ledgers with the participants an indexer must record, derived from the ledger meta by generator/src/scenes.rs under the definition at the top of that file.",
+  "scenes": [
+    {
+      "id": "SCENE-SPONSORED-CB-CLAIM-0001",
+      "title": "A claimant claims a claimable balance whose reserve another account sponsors",
+      "description": "ClaimClaimableBalance names only the claimant (source) and the balance ID. stellar-core removes the balance and updates the sponsor's account entry in the operation meta, because the sponsor's numSponsoring drops. The sponsor is therefore a participant, visible only in the meta.",
+      "cap": [
+        "CAP-0023",
+        "CAP-0033"
+      ],
+      "related_issues": [
+        "https://github.com/stellar/wallet-backend/issues/677"
+      ],
+      "source": {
+        "kind": "testnet",
+        "network_passphrase": "Test SDF Network ; September 2015",
+        "ledger": 5777140,
+        "ledger_hash": "f24402eff0e4486883064daf4490ebbab071acdf2e522354873295ae03724ae5",
+        "tx_hash": "dba24ee48dc9ac7049c2e9510694811d74d7b64dd7d6fd627993c5df715b9132",
+        "setup_tx_hash": "7863f6b104c3365bd94b54d10f7050ee36b23c4714ce5c8aebc4994253c324f3",
+        "ledger_close_meta": {
+          "file": "captured/testnet/ledger-5777140.lcm.xdr",
+          "byte_length": 289752,
+          "sha256": "7d41ef6ee589a884cdb6834fc034f6223173b287b7c78c0542fbd470d53746ca"
+        }
+      },
+      "protocol_observed": 30,
+      "transaction_meta_version": 4,
+      "roles": {
+        "sponsor": "GCVW6YP3545RS2FNUYYDDNAGPRATBKODREAWKDD572V4JPBSFXMCSNMO",
+        "claimant": "GDETDVD2WYMQ6URIYL6NXKL5C2PMGYS4HNBJR6ZRGHYWXM343GAM2APL"
+      },
+      "expected_participants": {
+        "fee": [
+          "GDETDVD2WYMQ6URIYL6NXKL5C2PMGYS4HNBJR6ZRGHYWXM343GAM2APL"
+        ],
+        "state": [
+          "GCVW6YP3545RS2FNUYYDDNAGPRATBKODREAWKDD572V4JPBSFXMCSNMO",
+          "GDETDVD2WYMQ6URIYL6NXKL5C2PMGYS4HNBJR6ZRGHYWXM343GAM2APL"
+        ],
+        "all": [
+          "GCVW6YP3545RS2FNUYYDDNAGPRATBKODREAWKDD572V4JPBSFXMCSNMO",
+          "GDETDVD2WYMQ6URIYL6NXKL5C2PMGYS4HNBJR6ZRGHYWXM343GAM2APL"
+        ]
+      }
+    }
+  ]
+}

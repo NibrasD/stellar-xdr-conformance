@@ -1,0 +1,24 @@
+{
+  "runner": "wallet-backend",
+  "suite": "scenes",
+  "target": "github.com/stellar/wallet-backend",
+  "commit": "3e22515a44979fdc3a558fda3991ca2b48e38cef",
+  "control_patch": "repro/wallet-backend/control-677.patch (local, not an upstream fix)",
+  "component": "internal/indexer/processors.ParticipantsProcessor.GetTransactionParticipants",
+  "results": [
+    {
+      "id": "SCENE-SPONSORED-CB-CLAIM-0001",
+      "status": "pass",
+      "recorded": [
+        "GCVW6YP3545RS2FNUYYDDNAGPRATBKODREAWKDD572V4JPBSFXMCSNMO",
+        "GDETDVD2WYMQ6URIYL6NXKL5C2PMGYS4HNBJR6ZRGHYWXM343GAM2APL"
+      ],
+      "expected": [
+        "GCVW6YP3545RS2FNUYYDDNAGPRATBKODREAWKDD572V4JPBSFXMCSNMO",
+        "GDETDVD2WYMQ6URIYL6NXKL5C2PMGYS4HNBJR6ZRGHYWXM343GAM2APL"
+      ],
+      "missing": [],
+      "extra": []
+    }
+  ]
+}

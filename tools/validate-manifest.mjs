@@ -80,9 +80,30 @@ for (const v of api.vectors ?? []) {
   apiIds.add(v.id);
 }
 
+// Replay scenes: schema, unique IDs, and the saved LedgerCloseMeta intact.
+const scenesSchema = JSON.parse(readFileSync(join(corpus, "schema/scenes.schema.json"), "utf8"));
+const scenes = JSON.parse(readFileSync(join(corpus, "scenes.json"), "utf8"));
+const validateScenes = ajv.compile(scenesSchema);
+if (!validateScenes(scenes)) {
+  for (const e of validateScenes.errors) errors.push(`scenes schema: ${e.instancePath || "/"} ${e.message}`);
+}
+const sceneIds = new Set();
+for (const sc of scenes.scenes ?? []) {
+  if (sceneIds.has(sc.id)) errors.push(`${sc.id}: duplicate scene id`);
+  sceneIds.add(sc.id);
+  const lcm = sc.source?.ledger_close_meta;
+  try {
+    const raw = readFileSync(join(corpus, lcm.file));
+    if (raw.length !== lcm.byte_length) errors.push(`${sc.id}: ${lcm.file} length differs from the scene record`);
+    if (createHash("sha256").update(raw).digest("hex") !== lcm.sha256) errors.push(`${sc.id}: ${lcm.file} sha256 mismatch`);
+  } catch {
+    errors.push(`${sc.id}: missing ${lcm?.file}`);
+  }
+}
+
 if (errors.length) {
   for (const e of errors) console.error(e);
   console.error(`\nmanifest invalid: ${errors.length} problem(s)`);
   process.exit(1);
 }
-console.log(`manifest valid: ${manifest.entries.length} entries, schema and bytes agree; ${api.vectors.length} API vectors valid`);
+console.log(`manifest valid: ${manifest.entries.length} entries, schema and bytes agree; ${api.vectors.length} API vectors valid; ${scenes.scenes.length} replay scenes valid`);

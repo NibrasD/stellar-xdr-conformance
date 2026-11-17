@@ -9,6 +9,7 @@
 //!   cargo run -p generator -- --check # fail if the files on disk differ
 
 mod api_vectors;
+mod scenes;
 
 use std::{
     fs,
@@ -558,6 +559,8 @@ fn main() -> ExitCode {
     let (built, manifest) = build(&corpus);
     let api_path = corpus.join("api-vectors.json");
     let api = api_vectors::build();
+    let scenes_path = corpus.join("scenes.json");
+    let scenes = scenes::build(&corpus);
 
     if check {
         let mut drift = Vec::new();
@@ -571,6 +574,9 @@ fn main() -> ExitCode {
         }
         if fs::read_to_string(&api_path).ok().as_deref() != Some(api.as_str()) {
             drift.push(api_path.display().to_string());
+        }
+        if fs::read_to_string(&scenes_path).ok().as_deref() != Some(scenes.as_str()) {
+            drift.push(scenes_path.display().to_string());
         }
         if drift.is_empty() {
             println!(
@@ -592,6 +598,7 @@ fn main() -> ExitCode {
     }
     fs::write(&manifest_path, manifest).unwrap();
     fs::write(&api_path, api).unwrap();
+    fs::write(&scenes_path, scenes).unwrap();
     println!(
         "wrote {} entries and {}",
         built.len(),

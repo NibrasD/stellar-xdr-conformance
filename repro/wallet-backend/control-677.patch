@@ -1,0 +1,27 @@
+diff --git a/internal/indexer/processors/participants.go b/internal/indexer/processors/participants.go
+index 458f394..417b5e2 100644
+--- a/internal/indexer/processors/participants.go
++++ b/internal/indexer/processors/participants.go
+@@ -99,11 +99,20 @@ func (p *ParticipantsProcessor) GetTransactionParticipants(transaction ingest.Le
+ 
+ 	// 1.1. Get participants involved in the transaction meta (if successful)
+ 	if transaction.Result.Successful() {
+-		metaParticipants, metaErr := participantsForMeta(transaction.UnsafeMeta)
++		changes, metaErr := transaction.GetChanges()
+ 		if metaErr != nil {
+ 			return nil, fmt.Errorf("identifying participants for meta: %w", metaErr)
+ 		}
+-		participants = append(participants, metaParticipants...)
++		for _, ch := range changes {
++			for _, e := range []*xdr.LedgerEntry{ch.Pre, ch.Post} {
++				if e == nil {
++					continue
++				}
++				if aid := participantsForLedgerEntry(*e); aid != nil {
++					participants = append(participants, *aid)
++				}
++			}
++		}
+ 	}
+ 
+ 	// 2. Push transaction and participants to data bundle

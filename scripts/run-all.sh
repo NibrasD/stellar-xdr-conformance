@@ -34,6 +34,10 @@ echo "== runner: python"
   .venv/bin/python api.py
 )
 
+echo "== replay scenes: wallet-backend"
+./repro/wallet-backend/run.sh >/dev/null
+./repro/wallet-backend/run.sh --control >/dev/null
+
 echo "== report"
 node tools/report.mjs > /dev/null
 echo "REPORT.md written; every outcome matches expectations/known-outcomes.json"

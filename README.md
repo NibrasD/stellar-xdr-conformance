@@ -127,9 +127,10 @@ family:
 | `SCVAL-MAP-KEYCOLLIDE-0104` | 5712621 | `418be97d…416cfc` |
 
 All four return values are **byte-identical** to the synthetic entries
-`-0001` to `-0004` (recorded as `same_bytes_as` in the manifest). The
-extraction was cross-checked with a second decoder, `@stellar/stellar-sdk`,
-which agreed on the ledger hashes and the bytes. Full hashes, the contract ID
+`-0001` to `-0004` (recorded as `same_bytes_as` in the manifest). Every
+captured entry, these four and the two signer entries below, is extracted a
+second time in CI by an unrelated codec, `@stellar/stellar-sdk`, from the
+same saved meta (`runners/js/crosscheck.mjs`), and must match byte for byte. Full hashes, the contract ID
 and the saved meta files are in `corpus/manifest.json` and
 `corpus/captured/`.
 

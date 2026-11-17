@@ -25,6 +25,9 @@ echo "== runner: go"
 echo "== runner: js"
 (cd runners/js && npm ci --silent --no-audit --no-fund && node run.mjs && node api.mjs)
 
+echo "== independent re-extraction of captured entries (JavaScript)"
+(cd runners/js && node crosscheck.mjs)
+
 echo "== runner: python"
 (
   cd runners/python

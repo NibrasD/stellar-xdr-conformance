@@ -8,11 +8,13 @@ repository turns each such bug into a corpus entry with expected decoded
 values, so one SDK's fix becomes every SDK's regression test.
 
 > **Status:** proof of concept for the SCF RFP *XDR/CAP-Coverage Audit Tool
-> and Indexer-Hardening Guide*. It covers one decode-side shape family
-> (SCMap key collisions) across four SDKs, with synthetic entries and entries
-> captured from real testnet ledgers, plus encode-side API vectors for the
-> JavaScript SDK. It reproduces the three SDK sightings the RFP names for the
-> conformance runner: js-stellar-sdk #1766, #1785 and #1789.
+> and Indexer-Hardening Guide*. It covers two decode-side shape families
+> across four SDKs: SCMap key collisions (CAP-0046), with synthetic entries
+> and entries captured from real testnet ledgers, and signed-payload signers
+> (CAP-0040), captured from real testnet ledgers. Encode-side API vectors
+> run on the JavaScript, Go and Python SDKs. It reproduces the three SDK
+> sightings the RFP names for the conformance runner: js-stellar-sdk #1766,
+> #1785 and #1789.
 
 ## Current results
 
@@ -32,7 +34,7 @@ transaction, extracted from the `LedgerCloseMeta` stellar-core produced
 (see [Core-emitted entries](#core-emitted-entries)). Every SDK gives each
 captured entry the same result as its synthetic twin.
 
-Every SDK decodes all nine entries, re-encodes them byte for byte, and
+Every SDK decodes all eleven entries, re-encodes them byte for byte, and
 (where it exposes xdr-json) produces the same JSON as rs-stellar-xdr. The
 divergence is in conversion to native language values:
 
@@ -106,6 +108,27 @@ extraction was cross-checked with a second decoder, `@stellar/stellar-sdk`,
 which agreed on the ledger hashes and the bytes. Full hashes, the contract ID
 and the saved meta files are in `corpus/manifest.json` and
 `corpus/captured/`.
+
+### Signed-payload signers (CAP-0040)
+
+Two `SignerKey` entries come from the same kind of capture
+(`capture/capture-signers.mjs`): a throwaway testnet account runs one
+`SetOptions` per shape, and the generator takes the signer that stellar-core
+added to the account entry in the operation meta (present after, absent
+before), not the one in the envelope.
+
+| Entry | Payload | Ledger (testnet, protocol 30) | Transaction |
+| --- | --- | --- | --- |
+| `SIGNERKEY-SIGNEDPAYLOAD-MAXLEN-0101` | 64 bytes, the CAP-0040 maximum | 5776735 | `d5b5a5a9…98727a` |
+| `SIGNERKEY-SIGNEDPAYLOAD-MINLEN-0102` | 1 byte, padded with 3 zero bytes | 5776736 | `d6975496…515bca` |
+
+This is the shape that halted wallet-backend ingestion
+([#729](https://github.com/stellar/wallet-backend/pull/729)) and that it
+stored truncated ([#716](https://github.com/stellar/wallet-backend/issues/716)).
+Each runner decodes the key, re-encodes it, and renders its `P...` strkey
+(SEP-0023) with the SDK's own encoder. Rust, Go, JavaScript and Python agree
+byte for byte and character for character on both entries; no SDK defect
+was found here.
 
 Testnet is reset from time to time, after which these ledgers can no longer
 be fetched. The saved `LedgerCloseMeta` files, with their SHA-256 in the

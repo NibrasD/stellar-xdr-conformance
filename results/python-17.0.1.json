@@ -85,6 +85,24 @@
       "xdr_json": "pass",
       "native": "silent-loss",
       "detail": "scval.to_native returned 1 of 2 entries without an error: {1: 20}"
+    },
+    {
+      "id": "SIGNERKEY-SIGNEDPAYLOAD-MAXLEN-0101",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "n/a",
+      "detail": ""
+    },
+    {
+      "id": "SIGNERKEY-SIGNEDPAYLOAD-MINLEN-0102",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "pass",
+      "native": "n/a",
+      "detail": ""
     }
   ]
 }

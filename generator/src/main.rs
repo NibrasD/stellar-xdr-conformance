@@ -19,8 +19,9 @@ use std::{
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use stellar_xdr::{
-    LedgerCloseMeta, Limits, ReadXdr, ScMap, ScMapEntry, ScString, ScSymbol, ScVal,
-    TransactionMeta, TransactionResultPair, TransactionResultResult, Validate, WriteXdr,
+    LedgerCloseMeta, LedgerEntry, LedgerEntryChange, LedgerEntryData, Limits, ReadXdr, ScMap,
+    ScMapEntry, ScString, ScSymbol, ScVal, SignerKey, TransactionMeta, TransactionResultPair,
+    TransactionResultResult, Validate, WriteXdr,
 };
 
 const STELLAR_XDR_VERSION: &str = "30.0.0";
@@ -56,6 +57,8 @@ fn map(pairs: Vec<(ScVal, ScVal)>) -> ScVal {
 
 const CAP_46_01: &str = "CAP-0046-01";
 const JS_1789: &str = "https://github.com/stellar/js-stellar-sdk/issues/1789";
+const WB_729: &str = "https://github.com/stellar/wallet-backend/pull/729";
+const WB_716: &str = "https://github.com/stellar/wallet-backend/issues/716";
 
 fn specs() -> Vec<Spec> {
     vec![
@@ -165,16 +168,16 @@ struct Built {
     bytes: Vec<u8>,
 }
 
-/// Extracts the Soroban return value of `tx_hash` from a saved
-/// LedgerCloseMeta. Before trusting the file it checks that the ledger
+/// Finds `tx_hash` in a saved LedgerCloseMeta and returns its meta and the
+/// ledger's protocol. Before trusting the file it checks that the ledger
 /// sequence and ledger hash are the ones recorded at capture time and that
-/// the transaction succeeded. Returns the value and the ledger's protocol.
-fn extract_return_value(
+/// the transaction succeeded.
+fn locate_tx(
     lcm_bytes: &[u8],
     ledger: u32,
     ledger_hash: &str,
     tx_hash: &str,
-) -> Result<(ScVal, u32), String> {
+) -> Result<(TransactionMeta, u32), String> {
     let lcm = LedgerCloseMeta::from_xdr(lcm_bytes, Limits::none())
         .map_err(|e| format!("decode LedgerCloseMeta: {e}"))?;
     let (header, txs): (_, Vec<(&TransactionResultPair, &TransactionMeta)>) = match &lcm {
@@ -219,13 +222,78 @@ fn extract_return_value(
     if !matches!(result.result.result, TransactionResultResult::TxSuccess(_)) {
         return Err(format!("tx {tx_hash} did not succeed"));
     }
-    let value = match meta {
+    Ok((meta.clone(), header.header.ledger_version))
+}
+
+/// The Soroban return value recorded in a transaction's meta.
+fn return_value(meta: &TransactionMeta) -> Result<ScVal, String> {
+    match meta {
         TransactionMeta::V3(m) => m.soroban_meta.as_ref().map(|s| s.return_value.clone()),
         TransactionMeta::V4(m) => m.soroban_meta.as_ref().and_then(|s| s.return_value.clone()),
         _ => None,
     }
-    .ok_or_else(|| format!("tx {tx_hash} has no Soroban return value"))?;
-    Ok((value, header.header.ledger_version))
+    .ok_or_else(|| "transaction has no Soroban return value".to_string())
+}
+
+/// Every ledger entry change in a transaction's operation meta, for the
+/// meta versions that carry per-operation changes.
+fn operation_changes(meta: &TransactionMeta) -> Result<Vec<&LedgerEntryChange>, String> {
+    Ok(match meta {
+        TransactionMeta::V1(m) => m
+            .operations
+            .iter()
+            .flat_map(|o| o.changes.0.iter())
+            .collect(),
+        TransactionMeta::V2(m) => m
+            .operations
+            .iter()
+            .flat_map(|o| o.changes.0.iter())
+            .collect(),
+        TransactionMeta::V3(m) => m
+            .operations
+            .iter()
+            .flat_map(|o| o.changes.0.iter())
+            .collect(),
+        TransactionMeta::V4(m) => m
+            .operations
+            .iter()
+            .flat_map(|o| o.changes.0.iter())
+            .collect(),
+        TransactionMeta::V0(_) => return Err("TransactionMeta V0 is not supported".to_string()),
+    })
+}
+
+/// The one signed-payload signer a transaction added to an account: present
+/// in the account entry core wrote after the operation (`Updated`) and absent
+/// from the entry before it (`State`). Read from the meta, not the envelope.
+fn added_signer(meta: &TransactionMeta) -> Result<SignerKey, String> {
+    let signers = |e: &LedgerEntry| -> Vec<SignerKey> {
+        match &e.data {
+            LedgerEntryData::Account(a) => a.signers.iter().map(|s| s.key.clone()).collect(),
+            _ => Vec::new(),
+        }
+    };
+    let (mut before, mut after) = (Vec::new(), Vec::new());
+    for change in operation_changes(meta)? {
+        match change {
+            LedgerEntryChange::State(e) => before.extend(signers(e)),
+            LedgerEntryChange::Updated(e) | LedgerEntryChange::Created(e) => {
+                after.extend(signers(e));
+            }
+            _ => {}
+        }
+    }
+    let added: Vec<SignerKey> = after
+        .into_iter()
+        .filter(|k| !before.contains(k) && matches!(k, SignerKey::Ed25519SignedPayload(_)))
+        .collect();
+    match added.as_slice() {
+        [one] => Ok(one.clone()),
+        other => Err(format!(
+            "expected one added signed-payload signer, found {}",
+            other.len()
+        )),
+    }
 }
 
 /// Corpus entries captured from the network by capture/capture.mjs. The
@@ -252,66 +320,121 @@ fn captured(corpus: &Path, synthetic: &[(&str, &str, Vec<u8>)]) -> Vec<(Value, B
             "{id}: LedgerCloseMeta file changed since capture"
         );
 
-        let (value, protocol) = extract_return_value(&lcm, ledger, s("ledger_hash"), s("tx_hash"))
+        let (meta, protocol) = locate_tx(&lcm, ledger, s("ledger_hash"), s("tx_hash"))
             .unwrap_or_else(|e| panic!("{id}: {e}"));
-        value
-            .validate()
-            .unwrap_or_else(|e| panic!("{id}: host emitted an invalid ScVal: {e}"));
-        let bytes = value.to_xdr(Limits::none()).expect("encode");
-
-        let shape_of = s("shape_of");
-        let (_, shape_title, shape_bytes) = synthetic
-            .iter()
-            .find(|(sid, _, _)| *sid == shape_of)
-            .unwrap_or_else(|| panic!("{id}: unknown shape_of {shape_of}"));
-
+        let extract = c["extract"].as_str().unwrap_or("soroban_return_value");
         let rel = format!("entries/{id}.xdr");
-        let mut entry = json!({
-            "id": id,
-            "title": format!("{shape_title}, captured on testnet"),
-            "description": format!(
-                "Return value of a real testnet transaction, extracted from the \
-                 LedgerCloseMeta stellar-core produced for ledger {ledger}. Same \
-                 shape as {shape_of}."
-            ),
-            "xdr_type": "ScVal",
-            "file": rel,
-            "encoding": "raw",
-            "byte_length": bytes.len(),
-            "sha256": sha256_hex(&bytes),
-            "cap": [CAP_46_01],
-            "protocol_version": {"introduced": 20, "observed": protocol},
-            "synthetic": false,
-            "source": {
-                "kind": "testnet",
-                "method": "TransactionMeta.soroban_meta.return_value of tx_hash, extracted from the \
-                    LedgerCloseMeta returned by RPC getLedgers (capture/capture.mjs, then \
-                    generator/src/main.rs extract_return_value)",
-                "network_passphrase": s("network_passphrase"),
-                "ledger": ledger,
-                "ledger_hash": s("ledger_hash"),
-                "tx_hash": s("tx_hash"),
-                "contract_id": s("contract_id"),
-                "ledger_close_meta": {
-                    "file": lcm_rel,
-                    "byte_length": lcm.len(),
-                    "sha256": sha256_hex(&lcm),
-                },
-            },
-            "tags": ["scmap", "native-conversion", "key-collision", "captured"],
-            "related_issues": [JS_1789],
-            "expected": {
-                "decoded": typed(&value),
-                "xdr_json": serde_json::to_value(&value).expect("xdr-json"),
-                "base64": base64_encode(&bytes),
+        let mut source = json!({
+            "kind": "testnet",
+            "network_passphrase": s("network_passphrase"),
+            "ledger": ledger,
+            "ledger_hash": s("ledger_hash"),
+            "tx_hash": s("tx_hash"),
+            "ledger_close_meta": {
+                "file": lcm_rel,
+                "byte_length": lcm.len(),
+                "sha256": sha256_hex(&lcm),
             },
         });
-        if bytes == *shape_bytes {
-            entry["same_bytes_as"] = json!(shape_of);
-        }
-        if let Some(n) = distinct_keys(&value) {
-            entry["native_conversion"] = json!({"rule": "preserve-or-reject", "distinct_keys": n});
-        }
+
+        let (mut entry, bytes) = match extract {
+            "soroban_return_value" => {
+                let value = return_value(&meta).unwrap_or_else(|e| panic!("{id}: {e}"));
+                value
+                    .validate()
+                    .unwrap_or_else(|e| panic!("{id}: host emitted an invalid ScVal: {e}"));
+                let bytes = value.to_xdr(Limits::none()).expect("encode");
+                let shape_of = s("shape_of");
+                let (_, shape_title, shape_bytes) = synthetic
+                    .iter()
+                    .find(|(sid, _, _)| *sid == shape_of)
+                    .unwrap_or_else(|| panic!("{id}: unknown shape_of {shape_of}"));
+                source["method"] = json!(
+                    "TransactionMeta.soroban_meta.return_value of tx_hash, extracted from the \
+                     LedgerCloseMeta returned by RPC getLedgers (capture/capture.mjs, then \
+                     generator/src/main.rs return_value)"
+                );
+                source["contract_id"] = json!(s("contract_id"));
+                let mut entry = json!({
+                    "id": id,
+                    "title": format!("{shape_title}, captured on testnet"),
+                    "description": format!(
+                        "Return value of a real testnet transaction, extracted from the \
+                         LedgerCloseMeta stellar-core produced for ledger {ledger}. Same \
+                         shape as {shape_of}."
+                    ),
+                    "xdr_type": "ScVal",
+                    "file": rel,
+                    "encoding": "raw",
+                    "byte_length": bytes.len(),
+                    "sha256": sha256_hex(&bytes),
+                    "cap": [CAP_46_01],
+                    "protocol_version": {"introduced": 20, "observed": protocol},
+                    "synthetic": false,
+                    "source": source,
+                    "tags": ["scmap", "native-conversion", "key-collision", "captured"],
+                    "related_issues": [JS_1789],
+                    "expected": {
+                        "decoded": typed(&value),
+                        "xdr_json": serde_json::to_value(&value).expect("xdr-json"),
+                        "base64": base64_encode(&bytes),
+                    },
+                });
+                if bytes == *shape_bytes {
+                    entry["same_bytes_as"] = json!(shape_of);
+                }
+                if let Some(n) = distinct_keys(&value) {
+                    entry["native_conversion"] =
+                        json!({"rule": "preserve-or-reject", "distinct_keys": n});
+                }
+                (entry, bytes)
+            }
+            "added_signer" => {
+                let key = added_signer(&meta).unwrap_or_else(|e| panic!("{id}: {e}"));
+                let bytes = key.to_xdr(Limits::none()).expect("encode");
+                let SignerKey::Ed25519SignedPayload(sp) = &key else {
+                    unreachable!("added_signer returns signed-payload signers only")
+                };
+                let n = sp.payload.len();
+                source["method"] = json!(
+                    "The signed-payload signer added by tx_hash: present in the account entry \
+                     after the operation and absent before it, in the operation changes of the \
+                     LedgerCloseMeta returned by RPC getLedgers (capture/capture-signers.mjs, \
+                     then generator/src/main.rs added_signer)"
+                );
+                let entry = json!({
+                    "id": id,
+                    "title": format!("Signed-payload signer with a {n}-byte payload, captured on testnet"),
+                    "description": format!(
+                        "SignerKey of type ED25519_SIGNED_PAYLOAD (CAP-0040) with a {n}-byte \
+                         payload ({} bytes of XDR padding), taken from the account entry \
+                         stellar-core wrote for ledger {ledger}. The strkey is a P address \
+                         (SEP-0023). The shape that halted wallet-backend ingestion (#729) \
+                         and was truncated by it (#716).",
+                        (4 - n % 4) % 4
+                    ),
+                    "xdr_type": "SignerKey",
+                    "file": rel,
+                    "encoding": "raw",
+                    "byte_length": bytes.len(),
+                    "sha256": sha256_hex(&bytes),
+                    "cap": ["CAP-0040"],
+                    "protocol_version": {"introduced": 19, "observed": protocol},
+                    "synthetic": false,
+                    "source": source,
+                    "tags": ["signer", "signed-payload", "strkey", "captured"],
+                    "related_issues": [WB_729, WB_716],
+                    "expected": {
+                        "decoded": {"type": "signer_key", "value": key.to_string()},
+                        "xdr_json": serde_json::to_value(&key).expect("xdr-json"),
+                        "base64": base64_encode(&bytes),
+                    },
+                });
+                (entry, bytes)
+            }
+            other => panic!("{id}: unknown extract kind {other}"),
+        };
+        entry["source"]["kind"] = json!("testnet");
         out.push((
             entry,
             Built {

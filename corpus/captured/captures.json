@@ -2,7 +2,11 @@
   "description": "Real testnet captures. Each LedgerCloseMeta was returned by RPC getLedgers for the ledger that included the transaction; the generator extracts the contract return value from it offline.",
   "captured_with": {
     "script": "capture/capture.mjs",
-    "sdk": "@stellar/stellar-sdk 17.4.0"
+    "sdk": "@stellar/stellar-sdk 17.4.0",
+    "scripts": [
+      "capture/capture.mjs",
+      "capture/capture-signers.mjs"
+    ]
   },
   "captures": [
     {
@@ -60,6 +64,30 @@
       "wasm_sha256": "caafa98490a2fc07b6d28e80af88f9db4547118ca4819e00ad2a4296d17a1e5b",
       "ledger_close_meta": "captured/testnet/ledger-5712621.lcm.xdr",
       "ledger_close_meta_sha256": "1d293b104bf5d33b7bc390a0e3ab989fdc7dfd31b0e6b1a7ce798789fb080299"
+    },
+    {
+      "id": "SIGNERKEY-SIGNEDPAYLOAD-MAXLEN-0101",
+      "extract": "added_signer",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "rpc_url": "https://soroban-testnet.stellar.org",
+      "ledger": 5776735,
+      "ledger_hash": "96614a653e5446ce6101359d3e0e74599a2b9bdb89d29bfe6a3a18324b88e2d4",
+      "ledger_close_time": 1794907321,
+      "tx_hash": "d5b5a5a91c5c05c53b14eb93235c3ea32fe479596b75839a903819317f98727a",
+      "ledger_close_meta": "captured/testnet/ledger-5776735.lcm.xdr",
+      "ledger_close_meta_sha256": "5b11256e571552df17ca29ac92303e6487b8e09cb5b1160625c8b130da279318"
+    },
+    {
+      "id": "SIGNERKEY-SIGNEDPAYLOAD-MINLEN-0102",
+      "extract": "added_signer",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "rpc_url": "https://soroban-testnet.stellar.org",
+      "ledger": 5776736,
+      "ledger_hash": "72d93e6a453df032a48b3aa9029e522a8ccb4ffa6f3b966d4c42f081a6f3b46b",
+      "ledger_close_time": 1794907326,
+      "tx_hash": "d6975496e85d348fe186c816b25bbaecc62cefaa4ad41b9222cdd0493f515bca",
+      "ledger_close_meta": "captured/testnet/ledger-5776736.lcm.xdr",
+      "ledger_close_meta_sha256": "3bb6c5d5fdc91cdf3eab4ff5df2153749d3e5e826a6a572038e7b5e65283b936"
     }
   ]
 }

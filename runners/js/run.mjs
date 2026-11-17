@@ -60,6 +60,8 @@ function checkEntry(sdk, entry) {
   const bytes = readFileSync(join(corpusDir, entry.file));
   const r = { id: entry.id, decode: "fail", roundtrip: "fail", structure: "fail", xdr_json: "n/a", native: "n/a", detail: "" };
 
+  if (entry.xdr_type === "SignerKey") return checkSignerKey(sdk, entry, bytes, r);
+
   let val;
   try {
     val = xdr.ScVal.fromXDR(bytes);
@@ -101,6 +103,33 @@ function checkEntry(sdk, entry) {
       r.native = "rejected";
       r.detail = `scValToNative threw ${e.constructor.name}: ${e.message}`;
     }
+  }
+  return r;
+}
+
+// A SignerKey's language-neutral form is its strkey (SEP-0023), produced
+// here by the SDK's own encoder.
+function checkSignerKey(sdk, entry, bytes, r) {
+  let key;
+  try {
+    key = sdk.xdr.SignerKey.fromXDR(bytes);
+    r.decode = "pass";
+  } catch (e) {
+    r.detail = `decode: ${e.message}`;
+    return r;
+  }
+  r.roundtrip = Buffer.compare(key.toXDR(), bytes) === 0 ? "pass" : "fail";
+  try {
+    const got = { type: "signer_key", value: sdk.SignerKey.encodeSignerKey(key) };
+    r.structure = isDeepStrictEqual(got, entry.expected.decoded) ? "pass" : "fail";
+    if (r.structure === "fail") r.detail = `structure: got ${JSON.stringify(got)}`;
+  } catch (e) {
+    r.detail = `structure: ${e.message}`;
+  }
+  if (entry.expected.xdr_json !== undefined && typeof key.toJSON === "function") {
+    const mine = JSON.parse(JSON.stringify(key.toJSON()));
+    r.xdr_json = isDeepStrictEqual(mine, entry.expected.xdr_json) ? "pass" : "fail";
+    if (r.xdr_json === "fail") r.detail = `xdr_json: got ${JSON.stringify(mine)}`;
   }
   return r;
 }

@@ -81,6 +81,24 @@
       "xdr_json": "n/a",
       "native": "n/a",
       "detail": ""
+    },
+    {
+      "id": "SIGNERKEY-SIGNEDPAYLOAD-MAXLEN-0101",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "n/a",
+      "native": "n/a",
+      "detail": ""
+    },
+    {
+      "id": "SIGNERKEY-SIGNEDPAYLOAD-MINLEN-0102",
+      "decode": "pass",
+      "roundtrip": "pass",
+      "structure": "pass",
+      "xdr_json": "n/a",
+      "native": "n/a",
+      "detail": ""
     }
   ],
   "runner": "go",

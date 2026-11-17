@@ -36,6 +36,7 @@ type typedEntry struct {
 
 type manifestEntry struct {
 	ID       string `json:"id"`
+	XdrType  string `json:"xdr_type"`
 	File     string `json:"file"`
 	Expected struct {
 		Decoded json.RawMessage `json:"decoded"`
@@ -100,6 +101,9 @@ func check(corpus string, e manifestEntry) result {
 		r.Detail = "read: " + err.Error()
 		return r
 	}
+	if e.XdrType == "SignerKey" {
+		return checkSignerKey(r, raw, e)
+	}
 	var v xdr.ScVal
 	if err := xdr.SafeUnmarshal(raw, &v); err != nil {
 		r.Detail = "decode: " + err.Error()
@@ -118,6 +122,35 @@ func check(corpus string, e manifestEntry) result {
 	}
 	var want, have any
 	gotJSON, _ := json.Marshal(got)
+	_ = json.Unmarshal(gotJSON, &have)
+	_ = json.Unmarshal(e.Expected.Decoded, &want)
+	if reflect.DeepEqual(have, want) {
+		r.Structure = "pass"
+	} else {
+		r.Detail = "structure: got " + string(gotJSON)
+	}
+	return r
+}
+
+// checkSignerKey: a SignerKey's language-neutral form is its strkey
+// (SEP-0023), produced here by the SDK's own encoder.
+func checkSignerKey(r result, raw []byte, e manifestEntry) result {
+	var k xdr.SignerKey
+	if err := xdr.SafeUnmarshal(raw, &k); err != nil {
+		r.Detail = "decode: " + err.Error()
+		return r
+	}
+	r.Decode = "pass"
+	if again, err := k.MarshalBinary(); err == nil && bytes.Equal(again, raw) {
+		r.Roundtrip = "pass"
+	}
+	addr, err := k.GetAddress()
+	if err != nil {
+		r.Detail = "strkey: " + err.Error()
+		return r
+	}
+	var want, have any
+	gotJSON, _ := json.Marshal(typedValue{Type: "signer_key", Value: &addr})
 	_ = json.Unmarshal(gotJSON, &have)
 	_ = json.Unmarshal(e.Expected.Decoded, &want)
 	if reflect.DeepEqual(have, want) {

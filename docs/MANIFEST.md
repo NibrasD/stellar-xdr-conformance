@@ -79,9 +79,18 @@ network. When a captured entry is byte-identical to a synthetic one, the
 manifest records it in `same_bytes_as`: evidence that the synthetic entry is
 something core really emits.
 
-To add a captured entry, extend `capture/capture.mjs` (or add a capture for
-an existing transaction), run it once, then run `cargo run -p generator`
-and commit the saved meta, `captures.json`, the entry and the manifest.
+Each capture names how its entry is extracted (`extract` in
+`captures.json`):
+
+| `extract` | Entry | Taken from |
+| --- | --- | --- |
+| `soroban_return_value` (default) | `ScVal` | `TransactionMeta.soroban_meta.return_value` |
+| `added_signer` | `SignerKey` | The one signed-payload signer present in the account entry after the operation (`Updated`) and absent before it (`State`), in the operation changes |
+
+To add a captured entry, extend a capture script in `capture/` (or add a
+capture for an existing transaction), run it once, then run
+`cargo run -p generator` and commit the saved meta, `captures.json`, the
+entry and the manifest.
 
 ## API vectors
 

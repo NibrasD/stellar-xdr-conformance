@@ -14,7 +14,7 @@ use std::{
 };
 
 use serde_json::{json, Value};
-use stellar_xdr::{Limits, ReadXdr, ScVal, Validate, WriteXdr};
+use stellar_xdr::{Limits, ReadXdr, ScVal, SignerKey, Validate, WriteXdr};
 
 const STELLAR_XDR_VERSION: &str = "30.0.0";
 
@@ -67,16 +67,25 @@ fn check(corpus: &Path, entry: &Value) -> Value {
             return r;
         }
     };
-    let val = match ScVal::from_xdr(&bytes, Limits::none()) {
+    match entry["xdr_type"].as_str().unwrap_or_default() {
+        "ScVal" => check_scval(&mut r, &bytes, entry),
+        "SignerKey" => check_signer_key(&mut r, &bytes, entry),
+        other => r["detail"] = json!(format!("xdr_type {other} not supported by this runner")),
+    }
+    r
+}
+
+fn check_scval(r: &mut Value, bytes: &[u8], entry: &Value) {
+    let val = match ScVal::from_xdr(bytes, Limits::none()) {
         Ok(v) => v,
         Err(e) => {
             r["detail"] = json!(format!("decode: {e}"));
-            return r;
+            return;
         }
     };
     r["decode"] = json!("pass");
 
-    if val.to_xdr(Limits::none()).ok().as_deref() == Some(bytes.as_slice()) {
+    if val.to_xdr(Limits::none()).ok().as_deref() == Some(bytes) {
         r["roundtrip"] = json!("pass");
     }
     match typed(&val) {
@@ -93,7 +102,31 @@ fn check(corpus: &Path, entry: &Value) -> Value {
         r["detail"] = json!(format!("validate: {e}"));
         r["decode"] = json!("fail");
     }
-    r
+}
+
+/// A SignerKey's language-neutral form is its strkey (SEP-0023), which is
+/// where truncation and padding mistakes show.
+fn check_signer_key(r: &mut Value, bytes: &[u8], entry: &Value) {
+    let key = match SignerKey::from_xdr(bytes, Limits::none()) {
+        Ok(k) => k,
+        Err(e) => {
+            r["detail"] = json!(format!("decode: {e}"));
+            return;
+        }
+    };
+    r["decode"] = json!("pass");
+    if key.to_xdr(Limits::none()).ok().as_deref() == Some(bytes) {
+        r["roundtrip"] = json!("pass");
+    }
+    let got = json!({"type": "signer_key", "value": key.to_string()});
+    if got == entry["expected"]["decoded"] {
+        r["structure"] = json!("pass");
+    } else {
+        r["detail"] = json!(format!("structure: got {got}"));
+    }
+    if serde_json::to_value(&key).ok().as_ref() == Some(&entry["expected"]["xdr_json"]) {
+        r["xdr_json"] = json!("pass");
+    }
 }
 
 fn main() {

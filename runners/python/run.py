@@ -15,7 +15,7 @@ from pathlib import Path
 import platform
 from typing import Any
 
-from stellar_sdk import scval, xdr
+from stellar_sdk import SignerKey, scval, xdr
 
 HERE = Path(__file__).resolve().parent
 
@@ -57,6 +57,8 @@ def check(corpus: Path, entry: dict[str, Any]) -> dict[str, Any]:
         "detail": "",
     }
     raw = (corpus / entry["file"]).read_bytes()
+    if entry["xdr_type"] == "SignerKey":
+        return check_signer_key(r, raw, entry)
     try:
         v = xdr.SCVal.from_xdr_bytes(raw)
     except Exception as e:  # noqa: BLE001 - any decode failure is a result
@@ -102,6 +104,33 @@ def check(corpus: Path, entry: dict[str, Any]) -> dict[str, Any]:
             else:
                 r["native"] = "unexpected"
                 r["detail"] = f"scval.to_native returned {native!r}, expected {want} entries"
+    return r
+
+
+def check_signer_key(r: dict[str, Any], raw: bytes, entry: dict[str, Any]) -> dict[str, Any]:
+    """A SignerKey's language-neutral form is its strkey (SEP-0023), produced
+    here by the SDK's own encoder."""
+    try:
+        k = xdr.SignerKey.from_xdr_bytes(raw)
+    except Exception as e:  # noqa: BLE001
+        r["detail"] = f"decode: {e!r}"
+        return r
+    r["decode"] = "pass"
+    if k.to_xdr_bytes() == raw:
+        r["roundtrip"] = "pass"
+    try:
+        got = {"type": "signer_key", "value": SignerKey.from_xdr_object(k).encoded_signer_key}
+        if got == entry["expected"]["decoded"]:
+            r["structure"] = "pass"
+        else:
+            r["detail"] = f"structure: got {json.dumps(got)}"
+    except Exception as e:  # noqa: BLE001
+        r["detail"] = f"structure: {e!r}"
+    if "xdr_json" in entry["expected"]:
+        mine = json.loads(json.dumps(k.to_json_dict()))
+        r["xdr_json"] = "pass" if mine == entry["expected"]["xdr_json"] else "fail"
+        if r["xdr_json"] == "fail":
+            r["detail"] = f"xdr_json: got {json.dumps(mine)}"
     return r
 
 

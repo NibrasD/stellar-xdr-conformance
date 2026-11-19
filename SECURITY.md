@@ -24,9 +24,15 @@ versions and the severity.
 
 ## What runs where
 
-The generator, runners and report run offline against files in this
-repository. They need no network access after dependencies are installed,
-and no keys or funds. The CI workflow has read-only repository permissions.
+The generator, the SDK runners, the cross-check and the report run offline
+against files in this repository. They need no network access after
+dependencies are installed, and no keys or funds. The wallet-backend
+reproduction (`repro/wallet-backend/run.sh`) is the exception: it fetches
+wallet-backend's source at a pinned commit from GitHub, and that commit's Go
+modules, before running offline on the saved ledger meta. The capture
+scripts in `capture/` are the only tools that talk to a Stellar network;
+they are run by hand, never in CI. The CI workflow has read-only repository
+permissions.
 Dependencies are pinned with integrity checks: `package-lock.json` (npm
 integrity hashes), `go.sum`, `Cargo.lock`, and a fully resolved Python
 lockfile (`runners/python/requirements.txt`, every transitive package with
